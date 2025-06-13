@@ -97,6 +97,32 @@ public class StatHelper {
         }
     }
 
+    public static void initializeWithDividerWithDifferentCriteria(Scoreboard scoreboard, MinecraftServer server, ScoreObjective objective, int divider,IScoreCriteria criteria) {
+        LOGGER.info("Initializing " + objective);
+        int totalScorePoints = 0;
+        if (!(criteria instanceof ScoreCriteriaStat)) {
+            return;
+        }
+        StatBase stat = ((ScoreCriteriaStat) criteria).stat;
+        for (Map.Entry<UUID, StatisticsManager> statEntry : getAllStatistics(server).entrySet()) {
+            StatisticsManager stats = statEntry.getValue();
+            int value = stats.readStat(stat) / divider;
+            if (value == 0) {
+                continue;
+            }
+            String username = getUsername(server, statEntry.getKey());
+            if (username == null) {
+                continue;
+            }
+            Score score = scoreboard.getOrCreateScore(username, objective);
+            score.setScorePoints(value);
+            totalScorePoints += value;
+            LOGGER.info("Initialized score " + objective.getName() + " of " + username + " to " + value);
+        }
+        Score totalScore = scoreboard.getOrCreateScore("Total", objective);
+        totalScore.setScorePoints(totalScorePoints);
+    }
+
     public static StatBase getBlockStateStats(IBlockState state) {
         Block block = state.getBlock();
         int id = Block.getIdFromBlock(block);

@@ -1339,6 +1339,10 @@ public class CarpetSettings
     @Rule(desc = "Enable bundled LMS implementation", category = FEATURE)
     public static boolean modLitematicaServerPaster = false;
 
+    // ===== Bullet ===== //
+    @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET})
+    public static boolean scoreboardStats;
+
     // ===== API ===== //
 
     /**
