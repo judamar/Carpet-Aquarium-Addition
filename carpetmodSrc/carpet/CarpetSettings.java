@@ -1411,7 +1411,7 @@ public class CarpetSettings
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM
     }
 
     private static boolean validatePositive(int value) {
