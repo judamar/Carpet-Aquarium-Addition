@@ -23,7 +23,6 @@ import carpet.helpers.DisabledSnooper;
 import carpet.helpers.RandomTickOptimization;
 import carpet.helpers.ScoreboardDelta;
 import carpet.patches.BlockWool;
-import carpet.utils.Messenger;
 import carpet.utils.TickingArea;
 import carpet.worldedit.WorldEditBridge;
 import net.minecraft.block.*;
@@ -1342,6 +1341,10 @@ public class CarpetSettings
     // ===== Bullet ===== //
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET})
     public static boolean scoreboardStats;
+
+    // ===== Aquarium ===== //
+    @Rule(desc = "Soulsand can be traded by Clerig villagers.", category = {EXPERIMENTAL, AQUARIUM})
+    public static boolean soulSandTradable;
 
     // ===== API ===== //
 
