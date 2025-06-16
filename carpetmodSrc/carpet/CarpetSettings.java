@@ -45,8 +45,8 @@ public class CarpetSettings
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.2.0";
-    public static final String carpetVersion = "Carpet Vastech Addition " + tagVersion;
+    public static final String tagVersion = "v0.1.0";
+    public static final String carpetVersion = "Carpet Aquairum Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
     public static final String mcpMappings = "39-1.12";
