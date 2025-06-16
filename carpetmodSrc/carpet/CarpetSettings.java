@@ -1346,6 +1346,9 @@ public class CarpetSettings
     @Rule(desc = "Soulsand can be traded by Clerig villagers.", category = {EXPERIMENTAL, AQUARIUM})
     public static boolean soulSandTradable;
 
+    @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
+    public static boolean playerCanPlaceCommandBlocks = false;
+
     // ===== API ===== //
 
     /**

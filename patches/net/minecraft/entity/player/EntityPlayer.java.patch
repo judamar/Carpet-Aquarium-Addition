@@ -217,7 +217,7 @@
      private void func_192026_k(@Nullable NBTTagCompound p_192026_1_)
      {
          if (!this.field_70170_p.field_72995_K && !p_192026_1_.func_82582_d())
-@@ -2307,6 +2392,13 @@
+@@ -2307,7 +2392,20 @@
      {
          return this.field_71075_bZ.field_75098_d && this.func_70003_b(2, "");
      }
@@ -229,9 +229,16 @@
 +        return !CarpetSettings.disablePlayerCollision;
 +    }
  
++    // AQ-CM: player can place command and structure blocks in survival
++    public boolean canPlaceCommandBlock()
++    {
++        return CarpetSettings.playerCanPlaceCommandBlocks ? this.func_70003_b(2, "") : this.field_71075_bZ.field_75098_d && func_70003_b(2, "");
++    }
++
      public static enum EnumChatVisibility
      {
-@@ -2333,11 +2425,11 @@
+         FULL(0, "options.chat.visibility.full"),
+@@ -2333,11 +2431,11 @@
          }
      }
  
