@@ -230,11 +230,11 @@ public class CarpetSettings
         return true;
     }
 
-    @Rule(desc = "The percentage of required sleeping players to skip the night", category = EXPERIMENTAL, options = {"0", "10", "50", "100"}, validator = "validateSleepingThreshold", extra = {
+    @Rule(desc = "The percentage of required sleeping players to skip the night", category = EXPERIMENTAL, options = {"0", "10", "50", "100"}, validator = "validateSleepingPercentage", extra = {
             "Use values from 0 to 100, 100 for default (all players needed)"
     })
-    public static int sleepingThreshold = 100;
-    private static boolean validateSleepingThreshold(int value) {
+    public static int sleepingPercentage = 100;
+    private static boolean validateSleepingPercentage(int value) {
         return value >= 0 && value <= 100;
     }
 
