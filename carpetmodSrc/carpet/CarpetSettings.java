@@ -101,8 +101,8 @@ public class CarpetSettings
     })
     public static boolean commandDistance = true;
 
-    @Rule(desc = "Enables /lazychunkbehavior command", category = COMMANDS, extra = {
-            "Makes a chunk act like a lazy chunk for entities and falling sand"
+    @Rule(desc = "Enables /entityinfo command", category = COMMANDS, extra = {
+            "Also enables yellow carpet placement action if 'carpets' rule is turned on as well"
     })
     public static boolean commandEntityInfo = true;
 
@@ -121,8 +121,8 @@ public class CarpetSettings
     @Rule(desc = "Enables /lagspike for manually induced lag spikes", category = COMMANDS)
     public static boolean commandLagspike;
 
-    @Rule(desc = "Enables /entityinfo command", category = COMMANDS, extra = {
-            "Also enables yellow carpet placement action if 'carpets' rule is turned on as well"
+    @Rule(desc = "Enables /lazychunkbehavior command", category = COMMANDS, extra = {
+            "Makes a chunk act like a lazy chunk for entities and falling sand"
     })
     public static boolean commandLazyChunkBehavior = false;
 
