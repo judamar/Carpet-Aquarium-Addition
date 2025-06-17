@@ -1352,6 +1352,9 @@ public class CarpetSettings
     @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17",category = {AQUARIUM, FEATURE})
     public static boolean shulkerBoxContentDropBackport = false;
 
+    @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
+    public static boolean minecartFullDropBackport = false;
+
     // ===== API ===== //
 
     /**

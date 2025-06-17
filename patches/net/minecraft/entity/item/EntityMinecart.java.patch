@@ -6,7 +6,7 @@
  
 +import carpet.CarpetSettings;
 +
-+ import carpet.CarpetSettings;
++import carpet.helpers.MinecartFullDropBackportHelper;
 +
  public abstract class EntityMinecart extends Entity implements IWorldNameable
  {
@@ -21,7 +21,40 @@
      public EntityMinecart(World p_i1712_1_)
      {
          super(p_i1712_1_);
-@@ -355,7 +362,9 @@
+@@ -170,20 +177,28 @@
+     public void func_94095_a(DamageSource p_94095_1_)
+     {
+         this.func_70106_y();
+-
+         if (this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops"))
+         {
+-            ItemStack itemstack = new ItemStack(Items.field_151143_au, 1);
+-
++            ItemStack itemstack;
++            if (CarpetSettings.minecartFullDropBackport)
++            {
++                itemstack = MinecartFullDropBackportHelper.getFullDropItem(this)
++                        .map(ItemStack::new)
++                        .orElse(new ItemStack(Items.field_151143_au));
++            }
++            else
++            {
++                itemstack = new ItemStack(Items.field_151143_au);
++            }
+             if (this.func_145818_k_())
+             {
+                 itemstack.func_151001_c(this.func_95999_t());
+             }
+-
+             this.func_70099_a(itemstack, 0.0F);
+         }
+     }
+ 
++
+     public boolean func_70067_L()
+     {
+         return !this.field_70128_L;
+@@ -355,7 +370,9 @@
                      {
                          Entity entity1 = list.get(j1);
  
@@ -32,7 +65,7 @@
                          {
                              entity1.func_184220_m(this);
                          }
-@@ -474,7 +483,10 @@
+@@ -474,7 +491,10 @@
          this.field_70179_y = d5 * d2 / d3;
          Entity entity = this.func_184188_bt().isEmpty() ? null : (Entity)this.func_184188_bt().get(0);
  
