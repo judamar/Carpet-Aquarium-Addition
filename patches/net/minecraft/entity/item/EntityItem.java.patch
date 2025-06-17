@@ -123,7 +123,7 @@
          return this.field_70171_ac;
      }
  
-@@ -295,6 +343,18 @@
+@@ -295,6 +343,19 @@
  
              if (this.field_70291_e <= 0)
              {
@@ -131,8 +131,9 @@
 +                if(CarpetSettings.cactusCounter && p_70097_1_ == DamageSource.field_76367_g){
 +                    HopperCounter.cactus.add(field_70170_p.func_73046_m(), func_92059_d());
 +                }
-+
-+                ShulkerBoxFullDropBackportHelper.onItemEntityDamagedToDie(this);
++                if(CarpetSettings.shulkerBoxContentDropBackport){
++                    ShulkerBoxFullDropBackportHelper.onItemEntityDamagedToDie(this);
++                }
 +
 +                // ----- Carpet Start ----- //
 +                if (LoggerRegistry.__items && logHelper != null) {
@@ -142,7 +143,7 @@
                  this.func_70106_y();
              }
  
-@@ -366,6 +426,10 @@
+@@ -366,6 +427,10 @@
              Item item = itemstack.func_77973_b();
              int i = itemstack.func_190916_E();
  
@@ -153,7 +154,7 @@
              if (this.field_145804_b == 0 && (this.field_145802_g == null || 6000 - this.field_70292_b <= 200 || this.field_145802_g.equals(p_70100_1_.func_70005_c_())) && p_70100_1_.field_71071_by.func_70441_a(itemstack))
              {
                  p_70100_1_.func_71001_a(this, i);
-@@ -376,8 +440,13 @@
+@@ -376,8 +441,13 @@
                      itemstack.func_190920_e(i);
                  }
  
@@ -168,7 +169,7 @@
          }
      }
  
-@@ -470,4 +539,9 @@
+@@ -470,4 +540,9 @@
          this.func_174871_r();
          this.field_70292_b = 5999;
      }
