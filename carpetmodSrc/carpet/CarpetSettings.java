@@ -1349,6 +1349,9 @@ public class CarpetSettings
     @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
     public static boolean playerCanPlaceCommandBlocks = false;
 
+    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17",category = {AQUARIUM, FEATURE})
+    public static boolean shulkerBoxContentDropBackport = false;
+
     // ===== API ===== //
 
     /**
