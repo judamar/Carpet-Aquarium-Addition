@@ -19,9 +19,7 @@ import java.util.stream.Collectors;
 
 import carpet.carpetclient.CarpetClientChunkLogger;
 import carpet.carpetclient.CarpetClientRuleChanger;
-import carpet.helpers.DisabledSnooper;
-import carpet.helpers.RandomTickOptimization;
-import carpet.helpers.ScoreboardDelta;
+import carpet.helpers.*;
 import carpet.patches.BlockWool;
 import carpet.utils.TickingArea;
 import carpet.worldedit.WorldEditBridge;
@@ -1354,6 +1352,12 @@ public class CarpetSettings
 
     @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
     public static boolean minecartFullDropBackport = false;
+
+    @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE})
+    public static boolean endstoneInstaminable = false;
+
+    @Rule(desc = "Obsidian is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE})
+    public static boolean obsidianInstaminable = false;
 
     // ===== API ===== //
 
