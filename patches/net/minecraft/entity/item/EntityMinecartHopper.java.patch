@@ -1,0 +1,23 @@
+--- ../src-base/minecraft/net/minecraft/entity/item/EntityMinecartHopper.java
++++ ../src-work/minecraft/net/minecraft/entity/item/EntityMinecartHopper.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.entity.item;
+ 
+ import java.util.List;
++
++import carpet.CarpetSettings;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.InventoryPlayer;
+@@ -160,7 +162,10 @@
+ 
+         if (this.field_70170_p.func_82736_K().func_82766_b("doEntityDrops"))
+         {
+-            this.func_145778_a(Item.func_150898_a(Blocks.field_150438_bZ), 1, 0.0F);
++            if (!CarpetSettings.minecartFullDropBackport)
++            {
++                this.func_145778_a(Item.func_150898_a(Blocks.field_150438_bZ), 1, 0.0F);
++            }
+         }
+     }
+ 
