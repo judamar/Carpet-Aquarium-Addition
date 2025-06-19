@@ -1359,6 +1359,9 @@ public class CarpetSettings
     @Rule(desc = "Obsidian is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
     public static boolean obsidianInstaminable = false;
 
+    @Rule(desc = "If a living entity dies on sand with fire on top the sand will convert into soul sand.", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean mobOnFireConvertsSandToSoulsand = false;
+
     // ===== API ===== //
 
     /**
