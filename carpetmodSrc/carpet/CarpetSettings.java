@@ -1353,10 +1353,10 @@ public class CarpetSettings
     @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
     public static boolean minecartFullDropBackport = false;
 
-    @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
     public static boolean endstoneInstaminable = false;
 
-    @Rule(desc = "Obsidian is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Obsidian is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
     public static boolean obsidianInstaminable = false;
 
     // ===== API ===== //
