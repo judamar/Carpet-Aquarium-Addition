@@ -1337,7 +1337,7 @@ public class CarpetSettings
     public static boolean modLitematicaServerPaster = false;
 
     // ===== Bullet ===== //
-    @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET})
+    @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
     public static boolean scoreboardStats;
 
     // ===== Aquarium ===== //
