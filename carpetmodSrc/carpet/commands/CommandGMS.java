@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
+import carpet.CarpetSettings;
 import carpet.logging.LoggerRegistry;
 import carpet.utils.Messenger;
 import net.minecraft.entity.player.EntityPlayerMP;
