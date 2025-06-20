@@ -1340,6 +1340,15 @@ public class CarpetSettings
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
     public static boolean scoreboardStats;
 
+    @Rule(desc = "Enables /view (inv|echest) <playername> to view objective and manipulate enderchest/invenory", category = {EXPERIMENTAL, COMMANDS, BULLET, AQUARIUM})
+    public static boolean commandInventory;
+
+    @Rule(desc = "Always sets player gamemode into survival when using /s command", category = {EXPERIMENTAL, BULLET, AQUARIUM})
+    public static boolean alwaysSetPlayerIntoSurvival;
+
+    @Rule(desc = "Tab info updates every gametick", category = {EXPERIMENTAL, BULLET, AQUARIUM})
+    public static boolean updateTabEveryGametick;
+
     // ===== Aquarium ===== //
     @Rule(desc = "Soulsand can be traded by Clerig villagers.", category = {EXPERIMENTAL, AQUARIUM})
     public static boolean soulSandTradable;
