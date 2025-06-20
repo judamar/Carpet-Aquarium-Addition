@@ -76,8 +76,11 @@ public class CommandGMS extends CommandCarpetBase
                                 Messenger.s(null, "s7: " + entityplayer.world.loadedEntityList.contains(entityplayer))
                         });
                     }
-                    return;
+                    if (!CarpetSettings.alwaysSetPlayerIntoSurvival) {
+                        return;
+                    }
                 }
+
             }
             entityplayer.fallDistance = 0;
             if(LoggerRegistry.__invisDebug){ // Added debugger for the complex bug turning players invisible. CARPET-XCOM
