@@ -19,8 +19,8 @@ import java.util.zip.ZipOutputStream;
 
 public class CarpetUpdater {
     static private String serverURL = "https://launcher.mojang.com/mc/game/1.12.2/server/886945bfb2b978778c3a0288fd7fab09d315b25f/server.jar";
-    // VasCM - replaced this with VasCM fork
-    static private String githubURL = "https://api.github.com/repos/Void-Skeleton/Carpet-Vastech-Addition/releases/latest";
+    // AqCM - replaced this with AqCM fork
+    static private String githubURL = "https://api.github.com/repos/judamar/Carpet-Aquarium-Addition/releases/latest";
     static private String vanillaJar = "update/MinecraftServer.1.12.2.jar";
     private static String carpetFileName = "update/Carpet.";
     private static final byte[] BUFFER = new byte[4096 * 1024];
@@ -134,11 +134,11 @@ public class CarpetUpdater {
         String[] tagVersions = tag.substring(tag.indexOf("_") + 1).replace("v", "").split("\\.");
         String[] currentTagVersions = CarpetSettings.tagVersion.replace("v", "").split("\\.");
         if (!compareTagVersions(tagVersions, currentTagVersions)) {
-            Messenger.print_server_message(server, "Already at the lastest VasCM version " + CarpetSettings.tagVersion);
+            Messenger.print_server_message(server, "Already at the lastest AqCM version " + CarpetSettings.tagVersion);
             return null;
         } else {
-            Messenger.print_server_message(server, "Current VasCM version: " + CarpetSettings.tagVersion);
-            Messenger.print_server_message(server, "Latest VasCM version: " + tag.substring(tag.indexOf("_" + 1)));
+            Messenger.print_server_message(server, "Current AqCM version: " + CarpetSettings.tagVersion);
+            Messenger.print_server_message(server, "Latest AqCM version: " + tag.substring(tag.indexOf("_" + 1)));
         }
 
 //        if (checkVersion(tag)) return null;
