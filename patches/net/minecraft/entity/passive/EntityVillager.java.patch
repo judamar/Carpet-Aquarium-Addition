@@ -293,7 +293,7 @@
          if (this.field_175563_bv != 0 && this.field_175562_bw != 0)
          {
              ++this.field_175562_bw;
-@@ -630,10 +822,24 @@
+@@ -630,10 +822,26 @@
          {
              this.field_70963_i = new MerchantRecipeList();
          }
@@ -310,15 +310,17 @@
 +        }
 +
 +        // Added way to trade soulsand from clerig worker villagers AQ-CM
-+        if (CarpetSettings.soulSandTradable && func_70946_n() == 2 && i == 1 && j == 4) {
-+            new EntityVillager.ListItemForEmeralds(new ItemStack(Item.func_150898_a(Blocks.field_150425_aM), 64, 0), new EntityVillager.PriceInfo(1, 2)).func_190888_a(this, this.field_70963_i, this.field_70146_Z);
++        /*
++        if (CarpetSettings.soulSandTradable && getProfession() == 2 && i == 1 && j == 4) {
++            new EntityVillager.ListItemForEmeralds(new ItemStack(Item.getItemFromBlock(Blocks.SOUL_SAND), 64, 0), new EntityVillager.PriceInfo(1, 2)).addMerchantRecipe(this, this.buyingList, this.rand);
 +        }
++         */
 +
 +
          if (i >= 0 && i < aentityvillager$itradelist.length)
          {
              EntityVillager.ITradeList[][] aentityvillager$itradelist1 = aentityvillager$itradelist[i];
-@@ -648,6 +854,7 @@
+@@ -648,6 +856,7 @@
                  }
              }
          }
@@ -326,7 +328,7 @@
      }
  
      public World func_190670_t_()
-@@ -842,6 +1049,11 @@
+@@ -842,6 +1051,11 @@
          ItemStack itemstack = p_175445_1_.func_92059_d();
          Item item = itemstack.func_77973_b();
  
@@ -338,7 +340,7 @@
          if (this.func_175558_a(item))
          {
              ItemStack itemstack1 = this.field_175560_bz.func_174894_a(itemstack);
-@@ -855,6 +1067,17 @@
+@@ -855,6 +1069,17 @@
                  itemstack.func_190920_e(itemstack1.func_190916_E());
              }
          }
@@ -356,7 +358,7 @@
      }
  
      private boolean func_175558_a(Item p_175558_1_)
-@@ -948,6 +1171,12 @@
+@@ -948,6 +1173,12 @@
          }
      }
  
@@ -369,7 +371,7 @@
      static class EmeraldForItems implements EntityVillager.ITradeList
          {
              public Item field_179405_a;
-@@ -1023,7 +1252,7 @@
+@@ -1023,7 +1254,7 @@
              }
          }
  
@@ -378,7 +380,7 @@
          {
              public ItemStack field_179407_a;
              public EntityVillager.PriceInfo field_179406_b;
-@@ -1093,7 +1322,7 @@
+@@ -1093,7 +1324,7 @@
              }
          }
  
@@ -387,7 +389,7 @@
          {
              public PriceInfo(int p_i45810_1_, int p_i45810_2_)
              {
-@@ -1140,4 +1369,37 @@
+@@ -1140,4 +1371,37 @@
                  }
              }
          }
