@@ -1,5 +1,6 @@
 package carpet.utils;
 
+import carpet.CarpetSettings;
 import carpet.helpers.HopperCounter;
 import carpet.helpers.TickSpeed;
 import carpet.logging.LoggerRegistry;
@@ -48,9 +49,11 @@ public class HUDController
 
     public static void update_hud(MinecraftServer server)
     {
-        if(server.getTickCounter() % 20 != 0)
-            return;
-
+        if (!CarpetSettings.updateTabEveryGametick) {
+            if (server.getTickCounter() % 20 != 0) {
+                return;
+            }
+        }
         player_huds.clear();
 
         if (LoggerRegistry.__autosave)
@@ -151,7 +154,7 @@ public class HUDController
         components.remove(components.size()-1);
         return new ITextComponent[]{Messenger.m(null, components.toArray(new Object[0]))};
     }
-    
+
     private static void log_counter(MinecraftServer server)
     {
         List<Object> commandParams = new ArrayList<>();
@@ -162,10 +165,16 @@ public class HUDController
 
     private static ITextComponent [] send_counter_info(MinecraftServer server, String color)
     {
-        HopperCounter counter = HopperCounter.getCounter(color);
-        List<ITextComponent> res = counter == null ? Collections.emptyList() : counter.format(server, false, true);
-        return new ITextComponent[]{ Messenger.m(null, res.toArray(new Object[0]))};
+        if (color.equals("all")) {
+            return HopperCounter.formatAll(server, false, true).toArray(new ITextComponent[0]);
+        } else {
+            HopperCounter counter = HopperCounter.getCounter(color);
+            if (counter != null)
+                return counter.format(server, false, true).toArray(new ITextComponent[0]);
+        }
+        return null;
     }
+
     private static ITextComponent [] packetCounter()
     {
         ITextComponent [] ret =  new ITextComponent[]{

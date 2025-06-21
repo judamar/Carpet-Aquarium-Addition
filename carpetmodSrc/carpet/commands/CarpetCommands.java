@@ -31,6 +31,7 @@ public class CarpetCommands {
         handler.registerCommand(new CommandGMS());
         handler.registerCommand(new CommandGrow());
         if (CarpetSettings.INTERNAL_BUILD) handler.registerCommand(new CommandIngameTest());
+        handler.registerCommand(new CommandInventory());//Bullet (coded by slowik)
         handler.registerCommand(new CommandLagSpike());
         handler.registerCommand(new CommandLazyChunkBehavior());
         handler.registerCommand(new CommandLight());
@@ -45,6 +46,7 @@ public class CarpetCommands {
         handler.registerCommand(new CommandRepopulate());
         handler.registerCommand(new CommandRNG());
         handler.registerCommand(new CommandScoreboardPublic());
+        handler.registerCommand(new CommandScoreboardStats());//Bullet
         handler.registerCommand(new CommandSetBlock13());
         handler.registerCommand(new CommandSpawn());
         handler.registerCommand(new CommandStructure());

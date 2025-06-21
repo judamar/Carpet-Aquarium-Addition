@@ -19,11 +19,8 @@ import java.util.stream.Collectors;
 
 import carpet.carpetclient.CarpetClientChunkLogger;
 import carpet.carpetclient.CarpetClientRuleChanger;
-import carpet.helpers.DisabledSnooper;
-import carpet.helpers.RandomTickOptimization;
-import carpet.helpers.ScoreboardDelta;
+import carpet.helpers.*;
 import carpet.patches.BlockWool;
-import carpet.utils.Messenger;
 import carpet.utils.TickingArea;
 import carpet.worldedit.WorldEditBridge;
 import net.minecraft.block.*;
@@ -46,8 +43,8 @@ public class CarpetSettings
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.2.0";
-    public static final String carpetVersion = "Carpet Vastech Addition " + tagVersion;
+    public static final String tagVersion = "v0.1.0";
+    public static final String carpetVersion = "Carpet Aquarium Addition" + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
     public static final String mcpMappings = "39-1.12";
@@ -94,7 +91,7 @@ public class CarpetSettings
     })
     public static boolean commandChunk = false;
 
-    @Rule(desc = "Enables /cluster command", category = COMMANDS)
+    @Rule(desc = "Enables /cluster command", category = {COMMANDS, VASTECH})
     public static boolean commandCluster = false;
 
     @Rule(desc = "Enables /distance command to measure in game distance between points", category = COMMANDS, extra = {
@@ -102,15 +99,15 @@ public class CarpetSettings
     })
     public static boolean commandDistance = true;
 
-    @Rule(desc = "Enables /lazychunkbehavior command", category = COMMANDS, extra = {
-            "Makes a chunk act like a lazy chunk for entities and falling sand"
+    @Rule(desc = "Enables /entityinfo command", category = COMMANDS, extra = {
+            "Also enables yellow carpet placement action if 'carpets' rule is turned on as well"
     })
     public static boolean commandEntityInfo = true;
 
-    @Rule(desc = "Enables /entityTask command", category = COMMANDS)
+    @Rule(desc = "Enables /entityTask command", category = {COMMANDS, VASTECH})
     public static boolean commandEntityTask = false;
 
-    @Rule(desc = "Enables /fill13 command, which is a /fill with grammar of 1.13", category = COMMANDS)
+    @Rule(desc = "Enables /fill13 command, which is a /fill with grammar of 1.13", category = {COMMANDS, VASTECH})
     public static boolean commandFill13 = false;
 
     @Rule(desc = "Enables /fillbiome command to change the biome of an area", category = COMMANDS)
@@ -122,8 +119,8 @@ public class CarpetSettings
     @Rule(desc = "Enables /lagspike for manually induced lag spikes", category = COMMANDS)
     public static boolean commandLagspike;
 
-    @Rule(desc = "Enables /entityinfo command", category = COMMANDS, extra = {
-            "Also enables yellow carpet placement action if 'carpets' rule is turned on as well"
+    @Rule(desc = "Enables /lazychunkbehavior command", category = COMMANDS, extra = {
+            "Makes a chunk act like a lazy chunk for entities and falling sand"
     })
     public static boolean commandLazyChunkBehavior = false;
 
@@ -159,7 +156,7 @@ public class CarpetSettings
     @Rule(desc = "Enables /rng command to manipulate and query rng", category = COMMANDS)
     public static boolean commandRNG = true;
 
-    @Rule(desc = "Enables /setblock13 command, which is a /setblock with grammar of 1.13", category = COMMANDS)
+    @Rule(desc = "Enables /setblock13 command, which is a /setblock with grammar of 1.13", category = {COMMANDS, VASTECH})
     public static boolean commandSetblock13 = false;
 
     @Rule(desc = "Enables /spawn command for spawn tracking", category = COMMANDS)
@@ -231,11 +228,11 @@ public class CarpetSettings
         return true;
     }
 
-    @Rule(desc = "The percentage of required sleeping players to skip the night", category = EXPERIMENTAL, options = {"0", "10", "50", "100"}, validator = "validateSleepingThreshold", extra = {
+    @Rule(desc = "The percentage of required sleeping players to skip the night", category = EXPERIMENTAL, options = {"0", "10", "50", "100"}, validator = "validateSleepingPercentage", extra = {
             "Use values from 0 to 100, 100 for default (all players needed)"
     })
-    public static int sleepingThreshold = 100;
-    private static boolean validateSleepingThreshold(int value) {
+    public static int sleepingPercentage = 100;
+    private static boolean validateSleepingPercentage(int value) {
         return value >= 0 && value <= 100;
     }
 
@@ -1209,36 +1206,36 @@ public class CarpetSettings
      * ==============================
      */
 
-    @Rule(desc = "Move the action of fake players from EU phase to NU phase", category = FEATURE)
+    @Rule(desc = "Move the action of fake players from EU phase to NU phase", category = {FEATURE, VASTECH})
     public static boolean fakePlayerInNUPhase = false;
 
-    @Rule(desc = "Disable the large stacktrace output of update suppression and convert to a single line of output, to lower the pressure of MCDR and lower log file size. ", category = FIX)
+    @Rule(desc = "Disable the large stacktrace output of update suppression and convert to a single line of output, to lower the pressure of MCDR and lower log file size. ", category = {FIX, VASTECH})
     public static boolean disableUpdateSuppressionLogging = false;
 
     @Rule(desc = "DON'T PUT A GOD-DAMN CARPET RULE FOR THIS OR I WILL GET MAD!\n" +
-            "Mojang even added this in 16. CARPET-XCOM", category = CREATIVE)
+            "Mojang even added this in 16. CARPET-XCOM", category = {CREATIVE, VASTECH})
     public static boolean goddamnCarpetRule = true;
 
     @Rule(desc = "It is inconsistent that all modern carpet versions freezes block events on /tick freeze " +
-            "but 1.12 carpet doesn't. Here is a fix for that. ", category = EXPERIMENTAL)
+            "but 1.12 carpet doesn't. Here is a fix for that. ", category = {EXPERIMENTAL, VASTECH})
     public static boolean freezeBlockEventsOnTickFreeze = true;
 
-    @Rule(desc = "/tick commands other than /tick health and /tick entities require admin permission to run", category = FIX)
+    @Rule(desc = "/tick commands other than /tick health and /tick entities require admin permission to run", category = {FIX, VASTECH})
     public static boolean mostTickCommandsRequireAdmin = true;
 
 
 
-    @Rule(desc = "Enables/disables village ticking", category = CREATIVE)
+    @Rule(desc = "Enables/disables village ticking", category = {CREATIVE, VASTECH})
     public static boolean tickVillages = true;
 
     @Rule(desc = "Let pressure plates, detector rails, frosted ice, " +
-            "string and repeating command blocks scheduled normally timed tile ticks on ITT", category = CREATIVE)
+            "string and repeating command blocks scheduled normally timed tile ticks on ITT", category = {CREATIVE, VASTECH})
     public static boolean calmITTCrashers = false;
 
-    @Rule(desc = "Disables snooper that collects data from your server to Mojang", category = FIX, validator = "validateDisableSnooper")
+    @Rule(desc = "Disables snooper that collects data from your server to Mojang", category = {FIX, VASTECH}, validator = "validateDisableSnooper")
     public static boolean disableSnooper = true;
 
-    @Rule(desc = "Disables serverside antispam", category = FIX)
+    @Rule(desc = "Disables serverside antispam", category = {FIX, VASTECH})
     public static boolean disableAntiSpam = false;
 
     @Rule(desc = "Shamelessly copied from carpet-extra to VasCM by me. " +
@@ -1247,7 +1244,7 @@ public class CarpetSettings
             "to fail at displaying those. ",
     extra = "Huge thanks to Enxulansis for making a blue redstone display resource pack for 1.12! " +
             "And for reminding me to add this rule. ",
-    category = {FIX, FEATURE})
+    category = {FIX, FEATURE, VASTECH})
     public static boolean blockStateSyncing = false;
 
     @Rule(desc = "When a CCE suppression happens for a non-player update, we catch the exception " +
@@ -1265,19 +1262,19 @@ public class CarpetSettings
             "has Galois group S_3, as if S_3 is a quotient of C_6. \n" +
             "These lines are here in the settings about CCE suppression " +
             "to keep him alert of this story. - Void, 2023/6/15",
-    category = FEATURE)
+    category = {FEATURE, VASTECH})
     public static boolean castSuppressorCrashFix = false;
 
     @Rule(desc = "Does what its name suggests",
     extra = "May help with lag reduction when testing flying machines. ",
-    category = FEATURE)
+    category = {FEATURE, VASTECH})
     public static boolean disableLightUpdates = false;
 
-    @Rule(desc = "Make redstone signals no longer prime TNTs. ", category = CREATIVE)
+    @Rule(desc = "Make redstone signals no longer prime TNTs. ", category = {CREATIVE, VASTECH})
     public static boolean TNTdoesNotPrime = false;
 
     @Rule(desc = "Make fake players drop their items on leaving, effectively removing the unfair fake player delivery",
-    category = SURVIVAL)
+    category = {SURVIVAL, VASTECH})
     @SurvivalDefault
     public static boolean fairFakePlayers = true;
 
@@ -1295,49 +1292,86 @@ public class CarpetSettings
     public static final long ONE_ONE_FOUR_FIVE_ONE_FOUR = 1145141919810L;
 
     @Rule(desc = "Make the penetration of every blast ray as weak as possible to detect problems with blast chambers",
-    category = CREATIVE)
+    category = {CREATIVE, VASTECH})
     public static boolean unluckyExplosions = false;
 
-    @Rule(desc = "Optimize calls for getting entities that intersects with a large AABB", category = OPTIMIZATIONS)
+    @Rule(desc = "Optimize calls for getting entities that intersects with a large AABB", category = {OPTIMIZATIONS, VASTECH})
     public static boolean optimizeLargeAreaEntityFetch = false;
 
-    @Rule(desc = "Fixes the crash loops related to ArrayIndexOutOfBounds when trying to freezing dragons", category = FIX)
+    @Rule(desc = "Fixes the crash loops related to ArrayIndexOutOfBounds when trying to freezing dragons", category = {FIX, VASTECH})
     public static boolean dragonFreezingCrashFix = false;
 
-    @Rule(desc = "Online player use offline UUID for player data", category = FEATURE)
+    @Rule(desc = "Online player use offline UUID for player data", category = {FEATURE, VASTECH})
     public static boolean useOfflineUUIDForPlayerData = false;
 
-    @Rule(desc = "Allow creative players to use the old behavior for flippinCactus that send no updates", category = EXPERIMENTAL)
+    @Rule(desc = "Allow creative players to use the old behavior for flippinCactus that send no updates", category = {EXPERIMENTAL, VASTECH})
     public static boolean creativeInconsistentCactus = true;
 
-    @Rule(desc = "Signs on diamond blocks have a comparator output equal to the number written on it", category = EXPERIMENTAL)
+    @Rule(desc = "Signs on diamond blocks have a comparator output equal to the number written on it", category = {EXPERIMENTAL, VASTECH})
     public static boolean signComparatorOutput = false;
 
-    @Rule(desc = "Signs on emerald blocks displays the signal strength received via its text", category = EXPERIMENTAL)
+    @Rule(desc = "Signs on emerald blocks displays the signal strength received via its text", category = {EXPERIMENTAL, VASTECH})
     public static boolean signComparatorDisplay = false;
 
-    @Rule(desc = "When on, disables all block/observer/comparator updates from propagating", category = EXPERIMENTAL)
+    @Rule(desc = "When on, disables all block/observer/comparator updates from propagating", category = {EXPERIMENTAL, VASTECH})
     public static boolean totallyNoBlockUpdates = false;
 
-    @Rule(desc = "When on, disables all onBlockAdded() and breakBlock() calls", category = EXPERIMENTAL)
+    @Rule(desc = "When on, disables all onBlockAdded() and breakBlock() calls", category = {EXPERIMENTAL, VASTECH})
     public static boolean disableBlockSelfChecks = false;
 
-    @Rule(desc = "Allows /setblock and /fill commands to place lit observers", category = FIX)
+    @Rule(desc = "Allows /setblock and /fill commands to place lit observers", category = {FIX, VASTECH})
     public static boolean setBlockCanPlaceLitObservers = false;
 
     @Rule(desc = "In a world with superflat generation, normal terrain generates " +
-            "instead in the overworld for x<0", category = EXPERIMENTAL)
+            "instead in the overworld for x<0", category = {EXPERIMENTAL, VASTECH})
     public static boolean semiFlatWorldGeneration = false;
 
     @Rule(desc = "In a world with superflat generation, all blocks are voided " +
-            " in the overworld after all generation and population completes for z<0", category = EXPERIMENTAL)
+            " in the overworld after all generation and population completes for z<0", category = {EXPERIMENTAL, VASTECH})
     public static boolean semiVoidWorldGeneration = false;
 
-    @Rule(desc = "BungeeCord IP forwarding protocol as a carpet rule", category = EXPERIMENTAL)
+    @Rule(desc = "BungeeCord IP forwarding protocol as a carpet rule", category = {EXPERIMENTAL, VASTECH})
     public static boolean bungeeCordForwarding = false;
 
-    @Rule(desc = "Enable bundled LMS implementation", category = FEATURE)
+    @Rule(desc = "Enable bundled LMS implementation", category = {FEATURE, VASTECH})
     public static boolean modLitematicaServerPaster = false;
+
+    // ===== Bullet ===== //
+    @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
+    public static boolean scoreboardStats;
+
+    @Rule(desc = "Enables /view (inv|echest) <playername> to view objective and manipulate enderchest/invenory", category = {EXPERIMENTAL, COMMANDS, BULLET, AQUARIUM})
+    public static boolean commandInventory;
+
+    @Rule(desc = "Always sets player gamemode into survival when using /s command", category = {EXPERIMENTAL, BULLET, AQUARIUM})
+    public static boolean alwaysSetPlayerIntoSurvival;
+
+    @Rule(desc = "Tab info updates every gametick", category = {EXPERIMENTAL, BULLET, AQUARIUM})
+    public static boolean updateTabEveryGametick;
+
+    // ===== Aquarium ===== //
+    /*
+    @Rule(desc = "Soulsand can be traded by Clerig villagers.", category = {EXPERIMENTAL, AQUARIUM})
+    public static boolean soulSandTradable;
+     */
+
+    @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
+    public static boolean playerCanPlaceCommandBlocks = false;
+
+    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17",category = {AQUARIUM, FEATURE})
+    public static boolean shulkerBoxContentDropBackport = false;
+
+    @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
+    public static boolean minecartFullDropBackport = false;
+
+    @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean endstoneInstaminable = false;
+
+    @Rule(desc = "Obsidian is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean obsidianInstaminable = false;
+
+    @Rule(desc = "If a living entity dies on sand with fire on top the sand will convert into soul sand.", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean mobOnFireConvertsSandToSoulsand = false;
 
     // ===== API ===== //
 
@@ -1411,7 +1445,7 @@ public class CarpetSettings
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM
     }
 
     private static boolean validatePositive(int value) {

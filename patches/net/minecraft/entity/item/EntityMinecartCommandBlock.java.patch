@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/net/minecraft/entity/item/EntityMinecartCommandBlock.java
++++ ../src-work/minecraft/net/minecraft/entity/item/EntityMinecartCommandBlock.java
+@@ -81,7 +81,6 @@
+                     p_188266_1_.func_188251_a(FixTypes.BLOCK_ENTITY, p_188266_2_, p_188266_3_);
+                     p_188266_2_.func_74778_a("id", "MinecartCommandBlock");
+                 }
+-
+                 return p_188266_2_;
+             }
+         });

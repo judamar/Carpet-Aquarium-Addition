@@ -75,7 +75,12 @@
      {
          this.field_149786_r = p_149713_1_;
          return this;
-@@ -328,7 +335,7 @@
+@@ -325,10 +332,12 @@
+     @Deprecated
+     public float func_176195_g(IBlockState p_176195_1_, World p_176195_2_, BlockPos p_176195_3_)
+     {
++        if (this == Blocks.field_150377_bs && CarpetSettings.endstoneInstaminable) return 1.55F;
++        if (this == Blocks.field_150343_Z && CarpetSettings.obsidianInstaminable) return 1.55F;
          return this.field_149782_v;
      }
  
@@ -84,7 +89,7 @@
      {
          this.field_149789_z = p_149675_1_;
          return this;
-@@ -357,12 +364,14 @@
+@@ -357,12 +366,14 @@
      }
  
      @Deprecated
@@ -101,7 +106,7 @@
      {
          if (p_185492_3_ != field_185506_k)
          {
-@@ -400,7 +409,10 @@
+@@ -400,7 +411,10 @@
  
      public void func_180645_a(World p_180645_1_, BlockPos p_180645_2_, IBlockState p_180645_3_, Random p_180645_4_)
      {
@@ -112,7 +117,7 @@
      }
  
      public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_)
-@@ -489,8 +501,17 @@
+@@ -489,8 +503,17 @@
              double d1 = (double)(p_180635_0_.field_73012_v.nextFloat() * 0.5F) + 0.25D;
              double d2 = (double)(p_180635_0_.field_73012_v.nextFloat() * 0.5F) + 0.25D;
              EntityItem entityitem = new EntityItem(p_180635_0_, (double)p_180635_1_.func_177958_n() + d0, (double)p_180635_1_.func_177956_o() + d1, (double)p_180635_1_.func_177952_p() + d2, p_180635_2_);
@@ -130,7 +135,7 @@
          }
      }
  
-@@ -594,7 +615,10 @@
+@@ -594,7 +617,10 @@
  
      public void func_180657_a(World p_180657_1_, EntityPlayer p_180657_2_, BlockPos p_180657_3_, IBlockState p_180657_4_, @Nullable TileEntity p_180657_5_, ItemStack p_180657_6_)
      {
@@ -142,7 +147,7 @@
          p_180657_2_.func_71020_j(0.005F);
  
          if (this.func_149700_E() && EnchantmentHelper.func_77506_a(Enchantments.field_185306_r, p_180657_6_) > 0)
-@@ -849,7 +873,8 @@
+@@ -849,7 +875,8 @@
          func_176219_a(32, "deadbush", (new BlockDeadBush()).func_149711_c(0.0F).func_149672_a(SoundType.field_185850_c).func_149663_c("deadbush"));
          func_176219_a(33, "piston", (new BlockPistonBase(false)).func_149663_c("pistonBase"));
          func_176219_a(34, "piston_head", (new BlockPistonExtension()).func_149663_c("pistonBase"));
