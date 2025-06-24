@@ -14,6 +14,7 @@ public class CarpetCommands {
         handler.registerCommand(new CommandAutosave());
         handler.registerCommand(new CommandBlockInfo());
         handler.registerCommand(new CommandCarpet());
+        handler.registerCommand(new CommandCenter());
         handler.registerCommand(new CommandChunk());
         handler.registerCommand(new CommandCluster());
         handler.registerCommand(new CommandCluster_old());
