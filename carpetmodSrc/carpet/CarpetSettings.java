@@ -1022,10 +1022,18 @@ public class CarpetSettings
     @Rule(desc = "Players drop there skulls when blown up by charged creepers.", category = FEATURE)
     public static boolean playerSkullsByChargedCreeper = false;
 
-    @Rule(desc = "Places the mined block in the player inventory when sneaking.", category = FEATURE)
-    public static boolean carefulBreak = false;
-
-
+    private static final String[] carefulBreakOptions = new String[] { "never", "always", "sneaking", "no-sneaking" };
+    @Rule(desc = "Places the mined block in the player inventory with this options.", options = { "never", "always", "sneaking", "no-sneaking" }, validator = "validateCarefulBreak", category = FEATURE, extra = {
+            "never: Mined blocks drops normally (vanilla)",
+            "always: Places the mined block in the player inventory always.",
+            "sneaking: Places the mined block in the player inventory when sneaking.",
+            "no-sneaking: Places the mined block in the player inventory when no-sneaking, if sneaking drops normally."
+    })
+    public static String carefulBreak = "never";
+    private static boolean validateCarefulBreak(String newValue)
+    {
+        return Arrays.asList(carefulBreakOptions).contains(newValue);
+    }
 
     @Rule(desc = "Allows empty shulkerboxes to stack in the player inventory.", category = FEATURE)
     public static boolean stackableShulkersPlayerInventory;
