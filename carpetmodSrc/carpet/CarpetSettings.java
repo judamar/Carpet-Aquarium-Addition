@@ -1381,6 +1381,9 @@ public class CarpetSettings
     @Rule(desc = "If a living entity dies on sand with fire on top the sand will convert into soul sand.", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
     public static boolean mobOnFireConvertsSandToSoulsand = false;
 
+    @Rule(desc = "Wet sponge absorb lava", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean wetSpongeAbsorbLava = false;
+
     // ===== API ===== //
 
     /**
