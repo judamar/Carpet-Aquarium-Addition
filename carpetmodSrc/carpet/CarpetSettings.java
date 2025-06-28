@@ -1387,6 +1387,9 @@ public class CarpetSettings
     @Rule(desc = "Enables /center command to calculate the center of a perimeter by taking 2 corners (X1,Z1 X2,Z2).", category = {AQUARIUM, COMMANDS})
     public static boolean commandCenter = false;
 
+    @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE})
+    public static boolean creativeOpenContainerForcibly = false;
+
     // ===== API ===== //
 
     /**
