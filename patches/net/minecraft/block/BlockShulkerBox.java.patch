@@ -9,7 +9,58 @@
  public class BlockShulkerBox extends BlockContainer
  {
      public static final PropertyEnum<EnumFacing> field_190957_a = PropertyDirection.func_177714_a("facing");
-@@ -176,7 +178,7 @@
+@@ -70,7 +72,8 @@
+         return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
+     }
+ 
+-    public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_)
++    public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_,
++                                    EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_)
+     {
+         if (p_180639_1_.field_72995_K)
+         {
+@@ -91,26 +94,32 @@
+ 
+                 if (((TileEntityShulkerBox)tileentity).func_190591_p() == TileEntityShulkerBox.AnimationStatus.CLOSED)
+                 {
+-                    AxisAlignedBB axisalignedbb = field_185505_j.func_72321_a((double)(0.5F * (float)enumfacing.func_82601_c()), (double)(0.5F * (float)enumfacing.func_96559_d()), (double)(0.5F * (float)enumfacing.func_82599_e())).func_191195_a((double)enumfacing.func_82601_c(), (double)enumfacing.func_96559_d(), (double)enumfacing.func_82599_e());
++                    AxisAlignedBB axisalignedbb = field_185505_j.func_72321_a(
++                            0.5F * enumfacing.func_82601_c(),
++                            0.5F * enumfacing.func_96559_d(),
++                            0.5F * enumfacing.func_82599_e()
++                    ).func_191195_a(
++                            enumfacing.func_82601_c(),
++                            enumfacing.func_96559_d(),
++                            enumfacing.func_82599_e()
++                    );
++
+                     flag = !p_180639_1_.func_184143_b(axisalignedbb.func_186670_a(p_180639_2_.func_177972_a(enumfacing)));
+                 }
+                 else
+                 {
+                     flag = true;
+                 }
+-
+-                if (flag)
++                if (flag || (CarpetSettings.creativeOpenContainerForcibly && p_180639_4_.field_71075_bZ.field_75098_d))
+                 {
+                     p_180639_4_.func_71029_a(StatList.field_191272_ae);
+-                    p_180639_4_.func_71007_a((IInventory)tileentity);
++                    p_180639_4_.func_71007_a((IInventory) tileentity);
+                 }
+ 
+                 return true;
+             }
+-            else
+-            {
+-                return false;
+-            }
++
++            return false;
+         }
+     }
+ 
+@@ -176,7 +185,7 @@
                  NBTTagCompound nbttagcompound = new NBTTagCompound();
                  NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                  nbttagcompound.func_74782_a("BlockEntityTag", ((TileEntityShulkerBox)tileentity).func_190580_f(nbttagcompound1));

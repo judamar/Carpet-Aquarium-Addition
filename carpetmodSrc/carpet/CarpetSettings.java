@@ -43,8 +43,8 @@ public class CarpetSettings
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.1.0";
-    public static final String carpetVersion = "Carpet Aquarium Addition" + tagVersion;
+    public static final String tagVersion = "v0.1.1";
+    public static final String carpetVersion = "Carpet Aquarium Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
     public static final String mcpMappings = "39-1.12";
@@ -1022,10 +1022,18 @@ public class CarpetSettings
     @Rule(desc = "Players drop there skulls when blown up by charged creepers.", category = FEATURE)
     public static boolean playerSkullsByChargedCreeper = false;
 
-    @Rule(desc = "Places the mined block in the player inventory when sneaking.", category = FEATURE)
-    public static boolean carefulBreak = false;
-
-
+    private static final String[] carefulBreakOptions = new String[] { "never", "always", "sneaking", "no-sneaking" };
+    @Rule(desc = "Places the mined block in the player inventory with this options.", options = { "never", "always", "sneaking", "no-sneaking" }, validator = "validateCarefulBreak", category = FEATURE, extra = {
+            "never: Mined blocks drops normally (vanilla)",
+            "always: Places the mined block in the player inventory always.",
+            "sneaking: Places the mined block in the player inventory when sneaking.",
+            "no-sneaking: Places the mined block in the player inventory when no-sneaking, if sneaking drops normally."
+    })
+    public static String carefulBreak = "never";
+    private static boolean validateCarefulBreak(String newValue)
+    {
+        return Arrays.asList(carefulBreakOptions).contains(newValue);
+    }
 
     @Rule(desc = "Allows empty shulkerboxes to stack in the player inventory.", category = FEATURE)
     public static boolean stackableShulkersPlayerInventory;
@@ -1372,6 +1380,15 @@ public class CarpetSettings
 
     @Rule(desc = "If a living entity dies on sand with fire on top the sand will convert into soul sand.", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
     public static boolean mobOnFireConvertsSandToSoulsand = false;
+
+    @Rule(desc = "Wet sponge absorb lava", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
+    public static boolean wetSpongeAbsorbLava = false;
+
+    @Rule(desc = "Enables /center command to calculate the center of a perimeter by taking 2 corners (X1,Z1 X2,Z2).", category = {AQUARIUM, COMMANDS})
+    public static boolean commandCenter = false;
+
+    @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE})
+    public static boolean creativeOpenContainerForcibly = false;
 
     // ===== API ===== //
 

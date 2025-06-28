@@ -1,0 +1,36 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockEnderChest.java
++++ ../src-work/minecraft/net/minecraft/block/BlockEnderChest.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.block;
+ 
+ import java.util.Random;
++
++import carpet.CarpetSettings;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.properties.IProperty;
+ import net.minecraft.block.properties.PropertyDirection;
+@@ -84,18 +86,21 @@
+         p_180633_1_.func_180501_a(p_180633_2_, p_180633_3_.func_177226_a(field_176437_a, p_180633_4_.func_174811_aO().func_176734_d()), 2);
+     }
+ 
+-    public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_, EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_)
++    public boolean func_180639_a(World p_180639_1_, BlockPos p_180639_2_, IBlockState p_180639_3_, EntityPlayer p_180639_4_,
++                                    EnumHand p_180639_5_, EnumFacing p_180639_6_, float p_180639_7_, float p_180639_8_, float p_180639_9_)
+     {
+         InventoryEnderChest inventoryenderchest = p_180639_4_.func_71005_bN();
+         TileEntity tileentity = p_180639_1_.func_175625_s(p_180639_2_);
+ 
+         if (inventoryenderchest != null && tileentity instanceof TileEntityEnderChest)
+         {
+-            if (p_180639_1_.func_180495_p(p_180639_2_.func_177984_a()).func_185915_l())
++            if (p_180639_1_.func_180495_p(p_180639_2_.func_177984_a()).func_185915_l() &&
++                    !(CarpetSettings.creativeOpenContainerForcibly && p_180639_4_.field_71075_bZ.field_75098_d))
+             {
+                 return true;
+             }
+-            else if (p_180639_1_.field_72995_K)
++
++            if (p_180639_1_.field_72995_K)
+             {
+                 return true;
+             }

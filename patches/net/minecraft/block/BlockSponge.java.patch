@@ -1,6 +1,25 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockSponge.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockSponge.java
-@@ -18,6 +18,9 @@
+@@ -1,6 +1,8 @@
+ package net.minecraft.block;
+ 
+ import com.google.common.collect.Lists;
++
++import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Queue;
+ import net.minecraft.block.material.Material;
+@@ -10,14 +12,19 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.creativetab.CreativeTabs;
+ import net.minecraft.init.Blocks;
++import net.minecraft.init.SoundEvents;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.NonNullList;
++import net.minecraft.util.SoundCategory;
+ import net.minecraft.util.Tuple;
+ import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.text.translation.I18n;
  import net.minecraft.world.World;
  
@@ -10,7 +29,73 @@
  public class BlockSponge extends Block
  {
      public static final PropertyBool field_176313_a = PropertyBool.func_177716_a("wet");
-@@ -119,6 +122,38 @@
+@@ -42,14 +49,65 @@
+     public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_)
+     {
+         this.func_176311_e(p_176213_1_, p_176213_2_, p_176213_3_);
++        if (CarpetSettings.wetSpongeAbsorbLava) this.tryAbsorbLava(p_176213_1_, p_176213_2_, p_176213_3_);
+     }
+ 
+     public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
+     {
+         this.func_176311_e(p_189540_2_, p_189540_3_, p_189540_1_);
++        if(CarpetSettings.wetSpongeAbsorbLava) tryAbsorbLava(p_189540_2_, p_189540_3_, p_189540_1_);
+         super.func_189540_a(p_189540_1_, p_189540_2_, p_189540_3_, p_189540_4_, p_189540_5_);
+     }
+ 
++    protected void tryAbsorbLava(World worldIn, BlockPos pos, IBlockState state)
++    {
++        if (state.func_177229_b(field_176313_a).booleanValue())
++        {
++            if (removeLavaBFS(worldIn, pos))
++            {
++                worldIn.func_180501_a(pos, Blocks.field_150360_v.func_176223_P(), 2);
++                worldIn.func_175718_b(2009, pos, Block.func_149682_b(Blocks.field_150353_l));
++                worldIn.func_184133_a(null, pos, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 1.0F, (1.0F + worldIn.field_73012_v.nextFloat() * 0.2F) * 0.7F);
++            }
++        }
++    }
++
++    private boolean removeLavaBFS(World world, BlockPos origin)
++    {
++        Queue<Tuple<BlockPos, Integer>> queue = new LinkedList<>();
++        queue.add(new Tuple<>(origin, 0));
++        int count = 0;
++
++        while (!queue.isEmpty())
++        {
++            Tuple<BlockPos, Integer> entry = queue.poll();
++            BlockPos pos = entry.func_76341_a();
++            int depth = entry.func_76340_b();
++
++            for (EnumFacing facing : EnumFacing.values())
++            {
++                BlockPos neighbor = pos.func_177972_a(facing);
++                IBlockState neighborState = world.func_180495_p(neighbor);
++                Block block = neighborState.func_177230_c();
++
++                if (block == Blocks.field_150353_l || block == Blocks.field_150356_k)
++                {
++                    world.func_175698_g(neighbor);
++                    count++;
++
++                    if (depth < 6)
++                    {
++                        queue.add(new Tuple<>(neighbor, depth + 1));
++                    }
++                }
++            }
++
++            if (count > 64) break;
++        }
++
++        return count > 0;
++    }
++
+     protected void func_176311_e(World p_176311_1_, BlockPos p_176311_2_, IBlockState p_176311_3_)
+     {
+         if (!((Boolean)p_176311_3_.func_177229_b(field_176313_a)).booleanValue() && this.func_176312_d(p_176311_1_, p_176311_2_))
+@@ -119,6 +177,38 @@
          return ((Boolean)p_176201_1_.func_177229_b(field_176313_a)).booleanValue() ? 1 : 0;
      }
  

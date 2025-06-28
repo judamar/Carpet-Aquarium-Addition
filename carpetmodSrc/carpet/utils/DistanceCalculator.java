@@ -13,6 +13,10 @@ public class DistanceCalculator
 {
     public static final HashMap<EntityPlayer, BlockPos> dist_pos = new HashMap<>();
 
+    public static int[] get_delta_position(BlockPos pos1, BlockPos pos2) {
+        return new int[] {MathHelper.abs(pos1.getX()-pos2.getX()), MathHelper.abs(pos1.getY()-pos2.getY()), MathHelper.abs(pos1.getZ()-pos2.getZ())};
+    }
+
     public static List<ITextComponent> print_distance_two_points(BlockPos pos1, BlockPos pos2)
     {
         int dx = MathHelper.abs(pos1.getX()-pos2.getX());
