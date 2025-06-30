@@ -13,6 +13,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -22,15 +23,17 @@ public class CarpetUpdater {
     // AqCM - replaced this with AqCM fork
     static private String githubURL = "https://api.github.com/repos/judamar/Carpet-Aquarium-Addition/releases/latest";
     static private String vanillaJar = "update/MinecraftServer.1.12.2.jar";
-    private static String carpetFileName = "update/Carpet.";
-    private static final byte[] BUFFER = new byte[4096 * 1024];
+    private static final byte[] BUFFER = new byte[4096 * 1024];;
 
     public static void updateCarpet(MinecraftServer server) {
         try {
-            if (!checkFile("update/")) {
-                new File("update/").mkdir();
+            File updateDir = new File("update/");
+            if (!updateDir.exists() && !updateDir.mkdirs()) {
+                Messenger.print_server_message(server, "Failed to create /update/ directory!");
+                return;
             }
-            String name = getCarpetFiles(server);
+
+            String name = getCarpetFiles(server, getLatestGithubRelease());
 
             if (name == null) {
                 Messenger.print_server_message(server, "Already running latest version");
@@ -44,7 +47,7 @@ public class CarpetUpdater {
 
             Messenger.print_server_message(server, "Building Carpet server jar");
             patch(name);
-            Messenger.print_server_message(server, "Update complete (carpet server file found in /update/ folder)");
+            Messenger.print_server_message(server, "Update complete (carpet server file found in /"+name+".jar)");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,15 +63,15 @@ public class CarpetUpdater {
     private static void patch(String path) throws Exception {
         ZipFile carpetZip = new ZipFile(path + ".zip");
         ZipFile originalJar = new ZipFile(vanillaJar);
+        File carpetDir = new File("update/carpet/");
         ZipOutputStream moddedJar = new ZipOutputStream(new FileOutputStream(path + ".jar"));
 
         Enumeration<? extends ZipEntry> entries = originalJar.entries();
         while (entries.hasMoreElements()) {
             ZipEntry e = entries.nextElement();
-
-            String name = e.getName();
-            if(carpetZip.getEntry(name) == null) {
-                moddedJar.putNextEntry(e);
+            if (carpetZip.getEntry(e.getName()) == null) {
+                ZipEntry newEntry = new ZipEntry(e.getName());
+                moddedJar.putNextEntry(newEntry);
                 if (!e.isDirectory()) {
                     copy(originalJar.getInputStream(e), moddedJar);
                 }
@@ -79,10 +82,18 @@ public class CarpetUpdater {
         Enumeration<? extends ZipEntry> newentries = carpetZip.entries();
         while (newentries.hasMoreElements()) {
             ZipEntry e = newentries.nextElement();
-            moddedJar.putNextEntry(e);
+
+            ZipEntry newEntry = new ZipEntry(e.getName());
+            newEntry.setTime(System.currentTimeMillis());
+
+            moddedJar.putNextEntry(newEntry);
+
             if (!e.isDirectory()) {
-                copy(carpetZip.getInputStream(e), moddedJar);
+                InputStream is = carpetZip.getInputStream(e);
+                copy(is, moddedJar);
+                is.close();
             }
+
             moddedJar.closeEntry();
         }
 
@@ -118,33 +129,38 @@ public class CarpetUpdater {
         return l1 > l2;
     }
 
-    private static String getCarpetFiles(MinecraftServer server) throws Exception {
-        String name = null;
+    private static JsonObject getLatestGithubRelease() throws Exception {
         URL url = new URL(githubURL);
         URLConnection request = url.openConnection();
         request.connect();
-
         JsonParser jp = new JsonParser();
         JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
-        JsonObject rootobj = root.getAsJsonObject();
-        String tag = rootobj.get("tag_name").getAsString();
+        return root.getAsJsonObject();
+    }
 
-        name = "VasCM_" + tag;
-        // VasCM - version check
-        String[] tagVersions = tag.substring(tag.indexOf("_") + 1).replace("v", "").split("\\.");
+    private static String getCarpetFiles(MinecraftServer server, JsonObject rootobj) throws Exception {
+        String tag = rootobj.get("tag_name").getAsString();
+        String name = "update/AqCM_" + tag;
+
+        String cleanedTag = tag.startsWith("v") ? tag.substring(1) : tag;
+        String[] tagVersions = cleanedTag.split("\\.");
         String[] currentTagVersions = CarpetSettings.tagVersion.replace("v", "").split("\\.");
         if (!compareTagVersions(tagVersions, currentTagVersions)) {
             Messenger.print_server_message(server, "Already at the lastest AqCM version " + CarpetSettings.tagVersion);
             return null;
         } else {
             Messenger.print_server_message(server, "Current AqCM version: " + CarpetSettings.tagVersion);
-            Messenger.print_server_message(server, "Latest AqCM version: " + tag.substring(tag.indexOf("_" + 1)));
+            Messenger.print_server_message(server, "Latest AqCM version: " + tag);
         }
 
 //        if (checkVersion(tag)) return null;
         if (checkFile(name + ".zip")) return name;
 
         JsonArray array = rootobj.get("assets").getAsJsonArray();
+        if (array.size() == 0) {
+            Messenger.print_server_message(server, "No assets found in the release");
+            return null;
+        }
         JsonElement arrayElement = array.get(0);
         JsonObject assets = arrayElement.getAsJsonObject();
         String urlcarpet = assets.get("browser_download_url").getAsString();
@@ -153,10 +169,6 @@ public class CarpetUpdater {
         downloadUsingStream(urlcarpet, name + ".zip");
 
         return name;
-    }
-
-    private static boolean checkVersion(String tag) {
-        return CarpetSettings.carpetVersion.equals(tag);
     }
 
     private static void downloadUsingStream(String urlStr, String file) throws IOException {
