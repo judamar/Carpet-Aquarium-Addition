@@ -30,6 +30,8 @@ public class CarpetCommands {
         handler.registerCommand(new CommandFeel());
         handler.registerCommand(new CommandFill13());
         handler.registerCommand(new CommandFillBiome());
+        handler.registerCommand(new CommandGetAllItems());
+        handler.registerCommand(new CommandGetFullBox());
         handler.registerCommand(new CommandGMC());
         handler.registerCommand(new CommandGMS());
         handler.registerCommand(new CommandGrow());
