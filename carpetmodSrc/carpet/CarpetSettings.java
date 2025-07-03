@@ -1390,6 +1390,12 @@ public class CarpetSettings
     @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE})
     public static boolean creativeOpenContainerForcibly = false;
 
+    @Rule(desc = "Enables /delimit command to calculate the limits of a perimeter by taking the center coordinate and radius (X, Z, radius).", category = {AQUARIUM, COMMANDS})
+    public static boolean commandDelimit = false;
+
+    @Rule(desc = "bitPattern", category = {AQUARIUM, COMMANDS})
+    public static boolean commandBitPattern = false;
+
     // ===== API ===== //
 
     /**
