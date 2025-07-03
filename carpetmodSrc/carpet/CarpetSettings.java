@@ -37,8 +37,7 @@ import net.minecraft.server.MinecraftServer;
 
 import static carpet.CarpetSettings.RuleCategory.*;
 
-public class CarpetSettings
-{
+public class CarpetSettings {
     public static final boolean INTERNAL_BUILD = false;
     public static boolean locked = false;
 
@@ -928,17 +927,6 @@ public class CarpetSettings
     public static boolean watchdogFix = false;
 
 
-
-
-
-
-
-
-
-
-
-
-
     @Rule(desc = "Prevents players from rubberbanding when moving too fast", category = {CREATIVE, SURVIVAL})
     @CreativeDefault
     public static boolean antiCheatSpeed = false;
@@ -948,18 +936,9 @@ public class CarpetSettings
     public static boolean calmNetherFires = false;
 
 
-
-
-
-
-
-
-
-
     @Rule(desc = "Recovers potion effects when they were replaced and the replacement ended", category = FIX)
     @BugFixDefault
     public static boolean effectsFix = false;
-
 
 
     @Rule(desc = "Players go invisible when dying or using portals.", category = FIX)
@@ -1078,8 +1057,6 @@ public class CarpetSettings
     public static boolean isRainyaphthylCute = true; */
 
 
-
-
     @Rule(desc = "Dropping entire stacks works also from on the crafting UI result slot", category = {FIX, SURVIVAL})
     @SurvivalDefault
     public static boolean ctrlQCraftingFix = false;
@@ -1165,8 +1142,6 @@ public class CarpetSettings
     public static boolean portalCaching = false;
 
 
-
-
     @Rule(desc = "sponge responds to random ticks", category = {EXPERIMENTAL, FEATURE}, validator = "validateSpongeRandom")
     public static boolean spongeRandom = false;
     private static boolean validateSpongeRandom(boolean value) {
@@ -1187,7 +1162,6 @@ public class CarpetSettings
     public static boolean dispenserMinecartFiller;
 
 
-
     @Rule(desc = "Redstone ore blocks can redirect redstone dust", category = {EXPERIMENTAL, FEATURE})
     public static boolean redstoneOreRedirectsDust = false;
 
@@ -1202,7 +1176,6 @@ public class CarpetSettings
 
     @Rule(desc = "Disables placement of the bedrock item", category = FEATURE)
     public static boolean disableBedrockPlacement = false;
-
 
 
     @Rule(desc = "Removes tnt applying velocity to other entities.", category = CREATIVE)
@@ -1230,7 +1203,6 @@ public class CarpetSettings
 
     @Rule(desc = "/tick commands other than /tick health and /tick entities require admin permission to run", category = {FIX, VASTECH})
     public static boolean mostTickCommandsRequireAdmin = true;
-
 
 
     @Rule(desc = "Enables/disables village ticking", category = {CREATIVE, VASTECH})
@@ -1366,10 +1338,10 @@ public class CarpetSettings
     @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
     public static boolean playerCanPlaceCommandBlocks = false;
 
-    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17",category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17", category = {AQUARIUM, FEATURE})
     public static boolean shulkerBoxContentDropBackport = false;
 
-    @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
     public static boolean minecartFullDropBackport = false;
 
     @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
