@@ -23,32 +23,11 @@ public class CommandGetAllItems extends CommandCarpetBase {
 
     private static final List<String> OBTAINABILITY = Arrays.asList("everything", "main_storage", "survival_obtainables");
     private static final List<String> STACKABILITY = Arrays.asList("stackables", "64_stackables", "16_stackables", "unstackables");
-//    private static final Set<String> META_VARIANT_ITEMS = new HashSet<>(Arrays.asList(
-//            "minecraft:wool",
-//            "minecraft:stained_hardened_clay",
-//            "minecraft:concrete",
-//            "minecraft:concrete_powder",
-//            "minecraft:carpet",
-//            "minecraft:stained_glass",
-//            "minecraft:stained_glass_pane",
-//            "minecraft:shulker_box",
-//            "minecraft:log",
-//            "minecraft:log2",
-//            "minecraft:leaves",
-//            "minecraft:leaves2",
-//            "minecraft:sandstone",
-//            "minecraft:red_sandstone",
-//            "minecraft:stone_slab",
-//            "minecraft:double_stone_slab",
-//            "minecraft:monster_egg",
-//            "minecraft:fish",
-//            "minecraft:coal"
-//    ));
 
     private static final Set<String> SURVIVAL_UNOBTAINABLE = new HashSet<>(Arrays.asList(
             "bedrock", "mob_spawner", "spawner", "command_block", "barrier",
             "structure_block", "structure_void", "end_portal_frame", "repeating_command_block",
-            "chain_command_block", "jigsaw", "knowledge_book", "debug_stick", "piston_head"
+            "chain_command_block", "jigsaw", "knowledge_book", "piston_head", "spawn_egg"
     ));
 
     private static final Set<String> JUNK_ITEMS = new HashSet<>(Arrays.asList(
@@ -62,7 +41,7 @@ public class CommandGetAllItems extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/getallitems [everything|main_storage|survival_obtainables] [stackables|64_stackables|16_stackables|unstackables]";
+        return "/getallitems [everything | main_storage | survival_obtainables] [stackables | 64_stackables | 16_stackables | unstackables]";
     }
 
     @Override
@@ -95,7 +74,7 @@ public class CommandGetAllItems extends CommandCarpetBase {
                 .flatMap(item -> getItemVariants(item).stream())
                 .collect(Collectors.toList());
 
-        // Agrupar en shulkers de 27 stacks y cofres de 27 shulkers
+        // group all
         List<ItemStack> shulkers = new ArrayList<>();
         for (int i = 0; i < stacks.size(); i += 27) {
             List<ItemStack> page = stacks.subList(i, Math.min(i + 27, stacks.size()));
@@ -106,16 +85,8 @@ public class CommandGetAllItems extends CommandCarpetBase {
                 tag.setByte("Slot", (byte) j);
                 tag.setString("id", Item.REGISTRY.getNameForObject(stack.getItem()).toString());
                 int maxStackSize = stack.getItem().getItemStackLimit();
-                int count;
-                switch (stackability) {
-                    case "64_stackables": count = 64;
-                    case "16_stackables": count = 16;
-                    case "stackables": count = maxStackSize;
-                    case "unstackables": count = 1;
-                    default: count = stack.getCount();
-                }
-                stack.setCount(count);
-                tag.setByte("Count", (byte) count);
+                stack.setCount(maxStackSize);
+                tag.setByte("Count", (byte) maxStackSize);
                 tag.setShort("Damage", (short) stack.getMetadata());
 
                 itemsTag.appendTag(tag);
@@ -148,10 +119,9 @@ public class CommandGetAllItems extends CommandCarpetBase {
         try {
             item.getSubItems(CreativeTabs.SEARCH, variants);
         } catch (Exception e) {
-            // ignora errores
+            // pass
         }
 
-        // Filtrar duplicados por nombre
         Set<String> seen = new HashSet<>();
         List<ItemStack> unique = new ArrayList<>();
 
@@ -162,7 +132,7 @@ public class CommandGetAllItems extends CommandCarpetBase {
                     unique.add(stack);
                 }
             } catch (Exception e) {
-                // ignora ítems con errores de nombre
+                // pass
             }
         }
 
@@ -177,11 +147,17 @@ public class CommandGetAllItems extends CommandCarpetBase {
         String id = Item.REGISTRY.getNameForObject(item).toString();
         int maxStack = item.getItemStackLimit();
 
-        if (obtainability.equals("main_storage")) {
-            if (SURVIVAL_UNOBTAINABLE.contains(id) || JUNK_ITEMS.contains(id) || id.contains("shulker_box"))
-                return false;
-        } else if (obtainability.equals("survival_obtainables")) {
-            if (SURVIVAL_UNOBTAINABLE.contains(id)) return false;
+        switch (obtainability) {
+            case "everything":
+                return true;
+            case "main_storage":
+                if (SURVIVAL_UNOBTAINABLE.contains(id) || JUNK_ITEMS.contains(id) || id.contains("shulker_box"))
+                    return false;
+                break;
+            case "survival_obtainables":
+                if (SURVIVAL_UNOBTAINABLE.contains(id))
+                    return false;
+                break;
         }
 
         switch (stackability) {
