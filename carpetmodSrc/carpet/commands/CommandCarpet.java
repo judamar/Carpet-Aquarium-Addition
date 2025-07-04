@@ -1,6 +1,8 @@
 package carpet.commands;
 
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import carpet.utils.Messenger;
@@ -229,17 +231,42 @@ public class CommandCarpet extends CommandCarpetBase
 
                 Arrays.stream(CarpetSettings.getExtraInfo(args[0])).forEach(s -> Messenger.s(player, " "+s,"g"));
 
-                List<ITextComponent> tags = new ArrayList<>();
-                tags.add(Messenger.m(null, "w Tags: "));
-                for (CarpetSettings.RuleCategory ctgy : CarpetSettings.RuleCategory.values())
-                {
-                    String t = ctgy.name().toLowerCase(Locale.ENGLISH);
-                    tags.add(Messenger.m(null, "c ["+t+"]", "^g list all "+t+" settings","!/carpet list "+t));
-                    tags.add(Messenger.s(null, ", "));
-                }
-                tags.remove(tags.size()-1);
-                Messenger.m(player, tags.toArray(new Object[0]));
+//                List<ITextComponent> tags = new ArrayList<>();
+//                tags.add(Messenger.m(null, "w Tags: "));
+//                for (CarpetSettings.RuleCategory ctgy : CarpetSettings.RuleCategory.values())
+//                {
+//                    String t = ctgy.name().toLowerCase(Locale.ENGLISH);
+//                    tags.add(Messenger.m(null, "c ["+t+"]", "^g list all "+t+" settings","!/carpet list "+t));
+//                    tags.add(Messenger.s(null, ", "));
+//                }
+//                tags.remove(tags.size()-1);
+//                Messenger.m(player, tags.toArray(new Object[0]));
 //
+                Set<String> validCategories = Arrays.stream(CarpetSettings.RuleCategory.values())
+                        .map(cat -> cat.name().toLowerCase(Locale.ENGLISH))
+                        .collect(Collectors.toSet());
+
+                Set<String> categories = new HashSet<>();
+                for (String cat : validCategories) {
+                    String[] rules = CarpetSettings.findAll(cat);
+                    for (String rule : rules) {
+                        if (rule.equalsIgnoreCase(args[0])) {
+                            categories.add(cat);
+                        }
+                    }
+                }
+
+                if (!categories.isEmpty()) {
+                    List<ITextComponent> tags = new ArrayList<>();
+                    tags.add(Messenger.m(null, "w Tags: "));
+                    for (String ctgy : categories) {
+                        tags.add(Messenger.m(null, "c [" + ctgy + "]", "^g list all " + ctgy + " settings", "!/carpet list " + ctgy));
+                        tags.add(Messenger.s(null, ", "));
+                    }
+                    tags.remove(tags.size() - 1);
+                    Messenger.m(player, tags.toArray(new Object[0]));
+                }
+
                 Messenger.m(player, "w Current value: ",String.format("%s %s (%s value)",CarpetSettings.get(args[0]).equalsIgnoreCase("true")?"lb":"nb", CarpetSettings.get(args[0]),CarpetSettings.get(args[0]).equalsIgnoreCase(CarpetSettings.getDefault(args[0]))?"default":"modified"));
                 List<ITextComponent> options = new ArrayList<>();
                 options.add(Messenger.m(null, "w Options: ", "y [ "));
