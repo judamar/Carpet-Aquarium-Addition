@@ -12,7 +12,7 @@ public class CarpetCommands {
         // For Xcom: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
         handler.registerCommand(new CommandAutosave());
-        handler.registerCommand(new CommandBitPattern());
+        handler.registerCommand(new CommandBitPattern()); //AQ_CM - Storage
         handler.registerCommand(new CommandBlockInfo());
         handler.registerCommand(new CommandCarpet());
         handler.registerCommand(new CommandCenter());
@@ -30,8 +30,8 @@ public class CarpetCommands {
         handler.registerCommand(new CommandFeel());
         handler.registerCommand(new CommandFill13());
         handler.registerCommand(new CommandFillBiome());
-        handler.registerCommand(new CommandGetAllItems());
-        handler.registerCommand(new CommandGetFullBox());
+        handler.registerCommand(new CommandGetAllItems()); //AQ_CM - Storage
+        handler.registerCommand(new CommandGetFullBox()); //AQ_CM - Storage
         handler.registerCommand(new CommandGMC());
         handler.registerCommand(new CommandGMS());
         handler.registerCommand(new CommandGrow());
