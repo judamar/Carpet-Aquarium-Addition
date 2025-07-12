@@ -1365,8 +1365,17 @@ public class CarpetSettings {
     @Rule(desc = "Enables /delimit command to calculate the limits of a perimeter by taking the center coordinate and radius (X, Z, radius).", category = {AQUARIUM, COMMANDS})
     public static boolean commandDelimit = false;
 
-    @Rule(desc = "bitPattern", category = {AQUARIUM, COMMANDS})
+    @Rule(desc = "Enables /bitpattern to create a matrix of binary combinations.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandBitPattern = false;
+
+    @Rule(desc = "Enables /getfullbox to create a shulker box fully with specified item.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandGetFullBox = false;
+
+    @Rule(desc = "Enables /getallitems to create a chest with all items of the game, can be filtered", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandGetAllItems = false;
+
+    @Rule(desc = "Enables /itemrandomizer to manage and apply item tables (collections of ItemStacks) into containers, blocks, or inventories using various strategies.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandItemRandomizer = false;
 
     // ===== API ===== //
 
@@ -1440,7 +1449,7 @@ public class CarpetSettings {
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE
     }
 
     private static boolean validatePositive(int value) {
