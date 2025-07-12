@@ -1,3 +1,4 @@
+//ported from: https://discord.com/channels/748542142347083868/756677711111389236/823683541048098818 dc: storage tech
 package carpet.commands;
 
 import carpet.utils.Messenger;
@@ -26,16 +27,24 @@ public class CommandBitPattern extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/bitpattern <top|bottom|undo> <bits> [size]";
+        return "/bitpattern <up|down|undo> <bits> [size]";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (command_enabled("commandBitPattern", sender))
         {
+            if (!(sender instanceof EntityPlayerMP)) throw new CommandException("Only players can use this command");
+
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+            World world = player.world;
+
+            if (!player.interactionManager.getGameType().isCreative()) {
+                throw new CommandException("You must be in Creative mode to use this command.");
+            }
+
             if (args.length == 1 && args[0].equalsIgnoreCase("undo"))
             {
-                EntityPlayerMP player = (EntityPlayerMP) sender;
                 UUID uuid = player.getUniqueID();
                 List<BlockPos> last = lastPatterns.get(uuid);
                 if (last == null || last.isEmpty())
@@ -52,24 +61,23 @@ public class CommandBitPattern extends CommandCarpetBase {
                 return;
             }
 
-            if (!(sender instanceof EntityPlayerMP)) throw new CommandException("Only players can use this command");
-
             if (args.length < 2 || args.length > 3) throw new WrongUsageException(getUsage(sender));
 
-            EntityPlayerMP player = (EntityPlayerMP) sender;
-            World world = player.world;
+            if (!args[0].equalsIgnoreCase("up") && !args[0].equalsIgnoreCase("down")) {
+                throw new CommandException("First argument must be 'up', 'down' or 'undo'");
+            }
+            boolean isUp = args[0].equalsIgnoreCase("up");
 
-            boolean isTop = args[0].equalsIgnoreCase("top");
             int bits = parseInt(args[1]);
             if (bits < 1 || bits > 20)
                 throw new CommandException("Bit count must be between 1 and 20");
 
             int size = args.length == 3 ? parseInt(args[2]) : 1;
 
-            List<IBlockState> blocks = isTop
+            List<IBlockState> blocks = isUp
                     ? Arrays.asList(
-                    Blocks.OBSERVER.getDefaultState().withProperty(net.minecraft.block.BlockObserver.FACING, EnumFacing.UP),
-                    Blocks.QUARTZ_BLOCK.getDefaultState())
+                    Blocks.QUARTZ_BLOCK.getDefaultState(),
+                    Blocks.OBSERVER.getDefaultState().withProperty(net.minecraft.block.BlockObserver.FACING, EnumFacing.UP))
                     : Arrays.asList(
                     Blocks.QUARTZ_BLOCK.getDefaultState(),
                     Blocks.OBSERVER.getDefaultState().withProperty(net.minecraft.block.BlockObserver.FACING, EnumFacing.DOWN)
@@ -81,13 +89,15 @@ public class CommandBitPattern extends CommandCarpetBase {
 
             List<List<Boolean>> pattern = generatePattern(bits);
             List<BlockPos> placedBlocks = new ArrayList<>();
+            boolean reverseBits = (facing == EnumFacing.SOUTH || facing == EnumFacing.WEST);
 
             for (int row = 0; row < pattern.size(); row++) {
                 List<Boolean> line = pattern.get(row);
-                BlockPos base = origin.offset(facing, row * size);
-                for (int col = 0; col < line.size(); col++) {
+                BlockPos base = origin.offset(facing, (pattern.size() - 1 - row) * size);
+                for (int col = 0; col < bits; col++) {
+                    int bitIndex = reverseBits ? col : (bits - 1 - col);
                     BlockPos pos = base.offset(offset, col);
-                    IBlockState state = blocks.get(line.get(col) ? 1 : 0);
+                    IBlockState state = blocks.get(line.get(bitIndex) ? 1 : 0);
                     world.setBlockState(pos, state, 3);
                     placedBlocks.add(pos);
                 }
@@ -137,10 +147,12 @@ public class CommandBitPattern extends CommandCarpetBase {
         return result;
     }
 
+
+
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1){
-            return getListOfStringsMatchingLastWord(args, "top", "bottom", "undo");
+            return getListOfStringsMatchingLastWord(args, "up", "down", "undo");
         } else {
             return Collections.emptyList();
         }
