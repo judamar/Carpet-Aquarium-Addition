@@ -1,6 +1,9 @@
+//ported from: https://github.com/CommandLeo/scarpet/blob/main/programs/randomizer.sc
 package carpet.commands;
 
+import carpet.helpers.ItemRandomizerHelper;
 import carpet.utils.Messenger;
+import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -9,20 +12,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityShulkerBox;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CommandItemRandomizer extends CommandCarpetBase {
-    private static final File TABLE_DIR = new File("item_randomizer_tables");
-
     @Override
     public String getName() {
         return "itemrandomizer";
@@ -30,289 +26,231 @@ public class CommandItemRandomizer extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/itemrandomizer <create|insert|give|list|info|delete> [...]";
+        return "/itemrandomizer <create|insert|give|list|use|info|delete|help>";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if (!(sender instanceof EntityPlayerMP)) {
-            Messenger.m(sender, "r Only players can use this command.");
-            return;
-        }
+        if (command_enabled("commandItemRandomizer", sender)) {
+            if (!(sender instanceof EntityPlayerMP)) {
+                throw new CommandException("Only players can use this command.");
+            }
 
-        EntityPlayerMP player = (EntityPlayerMP) sender;
-        WorldServer world = player.getServerWorld();
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+            WorldServer world = player.getServerWorld();
 
-        if (!TABLE_DIR.exists()) {
-            TABLE_DIR.mkdirs();
-        }
+            if (!player.interactionManager.getGameType().isCreative()) {
+                throw new CommandException("You must be in Creative mode to use this command.");
+            }
 
-        if (args.length < 1) {
-            Messenger.m(sender, "r Missing subcommand.");
-            return;
-        }
 
-        String sub = args[0];
+            if (!ItemRandomizerHelper.TABLE_DIR.exists()) {
+                ItemRandomizerHelper.TABLE_DIR.mkdirs();
+            }
 
-        if (sub.equalsIgnoreCase("create") && args.length == 2) {
-            TileEntity tile = getTargetedTile(player, 5.0);
+            if (args.length == 0) {
+                ItemRandomizerHelper.printHelpMessage(sender);
+                return;
+            }
 
-            if (tile instanceof IInventory) {
-                String tableName = args[1];
-                List<String> lines = new ArrayList<>();
-                IInventory inv = (IInventory) tile;
-                for (int i = 0; i < inv.getSizeInventory(); i++) {
-                    ItemStack stack = inv.getStackInSlot(i);
-                    if (!stack.isEmpty()) {
-                        ResourceLocation id = Item.REGISTRY.getNameForObject(stack.getItem());
-                        if (id != null) {
-                            lines.add(id.toString() + ":" + stack.getMetadata());
-                        }
+            String sub = args[0];
+            if (sub.equalsIgnoreCase("create")) {
+                if (args.length == 3 && args[1].equalsIgnoreCase("looking")) {
+                    TileEntity tile = ItemRandomizerHelper.getTargetedTile(player, 5.0);
+                    if (tile instanceof IInventory) {
+                        boolean success = ItemRandomizerHelper.saveInventoryToTable((IInventory) tile, args[2], sender);
+                        if (success) Messenger.m(sender, "g Table created from looking container: ", "w " + args[2]);
+                    } else {
+                        Messenger.m(sender, "r No container found.");
                     }
-                }
-                if (!lines.isEmpty()) {
-                    File out = new File(TABLE_DIR, tableName + ".txt");
-                    try (PrintWriter writer = new PrintWriter(new FileWriter(out))) {
-                        for (String line : lines) {
-                            writer.println(line);
-                        }
-                        Messenger.m(sender, "g Table created: ", "w " + tableName);
-                    } catch (IOException e) {
-                        Messenger.m(sender, "r Error writing table.");
+
+                } else if (args.length == 9 && args[1].equalsIgnoreCase("containers")) {
+                    int x1 = Integer.parseInt(args[2]);
+                    int y1 = Integer.parseInt(args[3]);
+                    int z1 = Integer.parseInt(args[4]);
+                    int x2 = Integer.parseInt(args[5]);
+                    int y2 = Integer.parseInt(args[6]);
+                    int z2 = Integer.parseInt(args[7]);
+                    String tableName = args[8];
+
+                    boolean success = ItemRandomizerHelper.saveContainersInAreaToTable(player.getServerWorld(), x1, y1, z1, x2, y2, z2, tableName, sender);
+                    if (success) {
+                        Messenger.m(sender, "g Table created from containers in area: ", "w " + tableName);
+                    } else {
+                        Messenger.m(sender, "r No containers found in area.");
+                    }
+
+                } else if (args.length == 9 && args[1].equalsIgnoreCase("area")) {
+                    int x1 = Integer.parseInt(args[2]);
+                    int y1 = Integer.parseInt(args[3]);
+                    int z1 = Integer.parseInt(args[4]);
+                    int x2 = Integer.parseInt(args[5]);
+                    int y2 = Integer.parseInt(args[6]);
+                    int z2 = Integer.parseInt(args[7]);
+                    String tableName = args[8];
+
+                    boolean success = ItemRandomizerHelper.saveBlockAreaToTable(player.getServerWorld(), x1, y1, z1, x2, y2, z2, tableName);
+                    if (success) {
+                        Messenger.m(sender, "g Table created from blocks in area: ", "w " + tableName);
+                    } else {
+                        Messenger.m(sender, "r No blocks found in area.");
+                    }
+                } else if ((args.length == 4 || args.length == 5) && args[1].equalsIgnoreCase("all_items")) {
+                    String tableName = args[2];
+                    String obtainability = args[3].toLowerCase();
+                    String stackability = args.length == 5 ? args[4].toLowerCase() : "stackables";
+
+                    List<ItemStack> items = ItemRandomizerHelper.getFilteredAllItems(obtainability, stackability);
+
+                    if (items == null || items.isEmpty()) {
+                        Messenger.m(sender, "r No items found for the specified filters.");
+                        return;
+                    }
+
+                    boolean success = ItemRandomizerHelper.writeStacksToTable(items, tableName);
+                    if (success) {
+                        Messenger.m(sender, "g Table created from all_items: ", "w " + tableName);
+                    } else {
+                        Messenger.m(sender, "r Could not create table. Table may already exist.");
                     }
                 } else {
-                    Messenger.m(sender, "r No items found in container.");
+                    throw new CommandException(getUsage(sender));
                 }
-            } else {
-                Messenger.m(sender, "r No container found.");
-            }
-
-        } else if (sub.equalsIgnoreCase("insert") && args.length >= 3) {
-            String mode = args[1];
-            String tableName = args[2];
-            List<ItemStack> items = loadTable(tableName);
-            if (items == null) {
-                Messenger.m(sender, "r Table not found.");
-                return;
-            }
-
-            TileEntity tile = getTargetedTile(player, 5.0);
-            if (!(tile instanceof IInventory)) {
-                Messenger.m(sender, "r No container found.");
-                return;
-            }
-
-            IInventory inv = (IInventory) tile;
-            Random rand = new Random();
-
-            for (int i = 0; i < inv.getSizeInventory(); i++) {
-                inv.setInventorySlotContents(i, ItemStack.EMPTY);
-            }
-
-            switch (mode.toLowerCase()) {
-                case "single":
-                    inv.setInventorySlotContents(0, items.get(rand.nextInt(items.size())).copy());
-                    break;
-                case "random":
-                    for (int i = 0; i < inv.getSizeInventory(); i++) {
-                        ItemStack base = items.get(rand.nextInt(items.size())).copy();
-                        int max = base.getItem().getItemStackLimit();
-                        base.setCount(1 + rand.nextInt(max));
-                        inv.setInventorySlotContents(i, base);
-                    }
-                    break;
-                case "box_full":
-                    for (int i = 0; i < inv.getSizeInventory(); i++) {
-                        ItemStack stack = items.get(rand.nextInt(items.size())).copy();
-                        int max = stack.getItem().getItemStackLimit();
-                        stack.setCount(max);
-                        inv.setInventorySlotContents(i, stack);
-                    }
-                    break;
-                default:
-                    Messenger.m(sender, "r Invalid mode.");
+            } else if (sub.equalsIgnoreCase("insert") && args.length >= 3) {
+                String mode = args[1];
+                String tableName = args[2];
+                List<ItemStack> items = ItemRandomizerHelper.loadTable(tableName);
+                if (items == null) {
+                    Messenger.m(sender, "r Table not found.");
                     return;
-            }
+                }
 
-            tile.markDirty();
-            world.markChunkDirty(tile.getPos(), tile);
-            Messenger.m(sender, "g Items inserted using table ", "w " + tableName);
-
-        } else if (sub.equalsIgnoreCase("give") && args.length >= 4) {
-            String itemId = args[1];
-            String mode = args[2];
-            String tableName = args[3];
-
-            Item containerItem = Item.getByNameOrId(itemId);
-            if (containerItem == null) {
-                Messenger.m(sender, "r Invalid item: ", "w " + itemId);
-                return;
-            }
-
-            List<ItemStack> items = loadTable(tableName);
-            if (items == null) {
-                Messenger.m(sender, "r Table not found.");
-                return;
-            }
-
-            Random rand = new Random();
-            TileEntityShulkerBox fakeBox = new TileEntityShulkerBox();
-            IInventory inv = fakeBox;
-
-            switch (mode.toLowerCase()) {
-                case "single":
-                    inv.setInventorySlotContents(0, items.get(rand.nextInt(items.size())).copy());
-                    break;
-                case "random":
-                    for (int i = 0; i < inv.getSizeInventory(); i++) {
-                        ItemStack base = items.get(rand.nextInt(items.size())).copy();
-                        int max = base.getItem().getItemStackLimit();
-                        base.setCount(1 + rand.nextInt(max));
-                        inv.setInventorySlotContents(i, base);
-                    }
-                    break;
-                case "box_full":
-                    for (int i = 0; i < inv.getSizeInventory(); i++) {
-                        ItemStack stack = items.get(rand.nextInt(items.size())).copy();
-                        int max = stack.getItem().getItemStackLimit();
-                        stack.setCount(max);
-                        inv.setInventorySlotContents(i, stack);
-                    }
-                    break;
-                default:
-                    Messenger.m(sender, "r Invalid mode.");
+                TileEntity tile = ItemRandomizerHelper.getTargetedTile(player, 5.0);
+                if (!(tile instanceof IInventory)) {
+                    Messenger.m(sender, "r No container found.");
                     return;
-            }
-
-            ItemStack shulker = new ItemStack(containerItem);
-            net.minecraft.nbt.NBTTagCompound tag = new net.minecraft.nbt.NBTTagCompound();
-            fakeBox.writeToNBT(tag);
-            shulker.setTagInfo("BlockEntityTag", tag);
-            shulker.setStackDisplayName("§r" + tableName);
-
-            if (!player.inventory.addItemStackToInventory(shulker)) {
-                player.dropItem(shulker, false);
-            }
-
-            Messenger.m(sender, "g Given item with content from ", "w " + tableName);
-
-        } else if (sub.equalsIgnoreCase("list")) {
-            String[] files = TABLE_DIR.list((dir, name) -> name.endsWith(".txt"));
-            if (files == null || files.length == 0) {
-                Messenger.m(sender, "y No tables found.");
-            } else {
-                Messenger.m(sender, "g Tables:");
-                for (String f : files) {
-                    Messenger.m(sender, "w - " + f.replace(".txt", ""));
                 }
-            }
 
-        } else if (sub.equalsIgnoreCase("info") && args.length == 2) {
-            List<ItemStack> items = loadTable(args[1]);
-            if (items == null) {
-                Messenger.m(sender, "r Table not found.");
-            } else {
-                Messenger.m(sender, "g Table contents:");
-                for (ItemStack item : items) {
-                    Messenger.m(sender, "w - " + Item.REGISTRY.getNameForObject(item.getItem()) + ":" + item.getMetadata());
+                boolean success = ItemRandomizerHelper.insertItems((IInventory) tile, items, mode, world);
+                if (success) {
+                    Messenger.m(sender, "g Items inserted using table ", "w " + tableName);
                 }
-            }
 
-        } else if (sub.equalsIgnoreCase("delete") && args.length == 2) {
-            File file = new File(TABLE_DIR, args[1] + ".txt");
-            if (file.exists()) {
-                file.delete();
-                Messenger.m(sender, "g Table deleted: ", "w " + args[1]);
-            } else {
-                Messenger.m(sender, "r Table not found.");
-            }
+            } else if ("insert_area".equalsIgnoreCase(args[0])) {
+                if (args.length != 9) {
+                    Messenger.m(sender, "r Usage: /itemrandomizer insert_area <mode> x1 y1 z1 x2 y2 z2 <table>");
+                    return;
+                }
 
-        } else {
-            Messenger.m(sender, "r Invalid usage. Try /itemrandomizer help");
-        }
-    }
+                String mode = args[1].toLowerCase();
+                if (!ItemRandomizerHelper.FILL_MODE.contains(mode)) {
+                    Messenger.m(sender, "r Invalid mode: ", "w " + mode);
+                    return;
+                }
 
-    private TileEntity getTargetedTile(EntityPlayerMP player, double maxDistance) {
-        Vec3d eyePosition = player.getPositionEyes(1.0F);
-        Vec3d look = player.getLook(1.0F);
-        Vec3d reach = eyePosition.add(look.x * maxDistance, look.y * maxDistance, look.z * maxDistance);
+                int x1 = CommandBase.parseInt(args[2]);
+                int y1 = CommandBase.parseInt(args[3]);
+                int z1 = CommandBase.parseInt(args[4]);
+                int x2 = CommandBase.parseInt(args[5]);
+                int y2 = CommandBase.parseInt(args[6]);
+                int z2 = CommandBase.parseInt(args[7]);
+                String table = args[8];
 
-        RayTraceResult ray = player.world.rayTraceBlocks(eyePosition, reach, false, false, false);
-        if (ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK) {
-            BlockPos pos = ray.getBlockPos();
-            return player.world.getTileEntity(pos);
-        }
-        return null;
-    }
+                List<ItemStack> items = ItemRandomizerHelper.loadTable(table);
+                if (items == null || items.isEmpty()) {
+                    Messenger.m(sender, "r Table not found or is empty: ", "w " + table);
+                    return;
+                }
 
-    private List<ItemStack> loadTable(String name) {
-        File file = new File(TABLE_DIR, name + ".txt");
-        if (!file.exists()) return null;
+                BlockPos pos1 = new BlockPos(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2));
+                BlockPos pos2 = new BlockPos(Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
 
-        List<ItemStack> result = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.trim().split(":");
-                if (parts.length >= 2) {
-                    String itemId = parts[0] + ":" + parts[1];
-                    Item item = Item.getByNameOrId(itemId);
-                    int meta = 0;
-                    if (parts.length == 3) {
-                        try {
-                            meta = Integer.parseInt(parts[2]);
-                        } catch (NumberFormatException ignored) {}
-                    }
-                    if (item != null) {
-                        result.add(new ItemStack(item, 1, meta));
+                int containersFilled = 0;
+
+                for (BlockPos pos : BlockPos.getAllInBox(pos1, pos2)) {
+                    TileEntity tile = world.getTileEntity(pos);
+                    if (tile instanceof IInventory) {
+                        IInventory inv = (IInventory) tile;
+                        ItemRandomizerHelper.insertItems(inv, items, mode, world);
+                        containersFilled++;
                     }
                 }
+
+                Messenger.m(sender, "g Inserted items using table ", "y " + table, "g into ", "w " + containersFilled, "g containers in area.");
+            } else if (sub.equalsIgnoreCase("give") && args.length >= 4) {
+                String itemId = args[1];
+                String mode = args[2];
+                String tableName = args[3];
+
+                Item containerItem = Item.getByNameOrId(itemId);
+                if (containerItem == null) {
+                    Messenger.m(sender, "r Invalid item: ", "w " + itemId);
+                    return;
+                }
+
+                List<ItemStack> items = ItemRandomizerHelper.loadTable(tableName);
+                if (items == null) {
+                    Messenger.m(sender, "r Table not found.");
+                    return;
+                }
+
+                ItemStack shulker = ItemRandomizerHelper.createContainerWithItems(containerItem, items, mode, tableName);
+                if (!player.inventory.addItemStackToInventory(shulker)) {
+                    player.dropItem(shulker, false);
+                }
+
+                Messenger.m(sender, "g Given item with content from ", "w " + tableName);
+
+            } else if (sub.equalsIgnoreCase("list")) {
+                List<String> tables = ItemRandomizerHelper.getSavedTables(sender);
+                if (tables.isEmpty()) {
+                    Messenger.m(sender, "r No tables found.");
+                } else {
+                    Messenger.m(sender, "wb Tables:");
+                    tables.forEach(name -> Messenger.m(sender, "w - " + name,
+                            "l  [i]", "^g Display info from table", "!/itemrandomizer info " + name,
+                            "r  [x]", "^g Delete table", "!/itemrandomizer delete " + name));
+                }
+
+            } else if (sub.equalsIgnoreCase("info") && args.length == 2) {
+                List<ItemStack> items = ItemRandomizerHelper.loadTable(args[1]);
+                if (items == null) {
+                    Messenger.m(sender, "r Table not found.");
+                } else {
+                    Messenger.m(sender, "wb Table ", "gb " + args[1], "wb  contents:");
+                    for (ItemStack item : items) {
+                        Messenger.m(sender, "w - " + Item.REGISTRY.getNameForObject(item.getItem()) + ":" + item.getMetadata());
+                    }
+                }
+
+            } else if (sub.equalsIgnoreCase("use")) {
+                if (args.length == 2) {
+                    ItemRandomizerHelper.useTables(sender, args[1], null);
+                } else if (args.length == 3) {
+                    ItemRandomizerHelper.useTables(sender, args[1], args[2]);
+                } else {
+                    Messenger.m(sender, "r Usage: /itemrandomizer use <insert|give> [container]");
+                }
+
+            } else if (sub.equalsIgnoreCase("delete") && args.length == 2) {
+                File file = new File(ItemRandomizerHelper.TABLE_DIR, args[1] + ".txt");
+                if (file.exists()) {
+                    file.delete();
+                    Messenger.m(sender, "g Table deleted: ", "r " + args[1]);
+                } else {
+                    Messenger.m(sender, "r Table not found.");
+                }
+
+            } else if (sub.equalsIgnoreCase("help")) {
+                ItemRandomizerHelper.printHelpMessage(sender);
+            } else {
+                Messenger.m(sender, "r Invalid usage. Try /itemrandomizer help");
             }
-        } catch (IOException e) {
-            return null;
         }
-        return result;
     }
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos) {
-        if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, Arrays.asList("create", "insert", "give", "list", "info", "delete"));
-        }
-        else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("delete")) {
-                return getListOfStringsMatchingLastWord(args, getSavedTables());
-            }
-            else if (args[0].equalsIgnoreCase("insert")) {
-                return getListOfStringsMatchingLastWord(args, Arrays.asList("single", "random", "box_full"));
-            }
-            else if (args[0].equalsIgnoreCase("give")) {
-                return getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
-            }
-        }
-        else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("insert")) {
-                return getListOfStringsMatchingLastWord(args, getSavedTables());
-            }
-            else if (args[0].equalsIgnoreCase("give")) {
-                return getListOfStringsMatchingLastWord(args, Arrays.asList("single", "random", "box_full"));
-            }
-        }
-        else if (args.length == 4 && args[0].equalsIgnoreCase("give")) {
-            return getListOfStringsMatchingLastWord(args, getSavedTables());
-        }
-        return Collections.emptyList();
+        return ItemRandomizerHelper.getTabCompletions(sender, args);
     }
-
-    private List<String> getSavedTables() {
-        if (!TABLE_DIR.exists()) return Collections.emptyList();
-        String[] files = TABLE_DIR.list((dir, name) -> name.endsWith(".txt"));
-        if (files == null) return Collections.emptyList();
-        List<String> names = new ArrayList<>();
-        for (String f : files) {
-            names.add(f.replace(".txt", ""));
-        }
-        return names;
-    }
-
 }
