@@ -64,7 +64,7 @@
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
 +        if (CarpetSettings.voidDamageIgnorePlayer && p_70097_1_ == DamageSource.field_76380_i) {
-+            return false; // Player doesn't take void damage
++            return false; //AqCM
 +        }
          if (this.func_180431_b(p_70097_1_))
          {
