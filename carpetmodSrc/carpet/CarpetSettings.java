@@ -219,6 +219,7 @@ public class CarpetSettings {
             "Set to 0 to disable Scoreboard delta display."
     })
     public static int scoreboardDelta = 0;
+
     private static boolean validateScoreboardDelta(int value) {
         if(value == 0) {
             scoreboardDelta = 0;
@@ -1376,6 +1377,9 @@ public class CarpetSettings {
 
     @Rule(desc = "Enables /itemrandomizer to manage and apply item tables (collections of ItemStacks) into containers, blocks, or inventories using various strategies.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandItemRandomizer = false;
+
+    @Rule(desc = "Prevents void damage for players", category = {AQUARIUM, EXPERIMENTAL, SURVIVAL})
+    public static boolean voidDamageIgnorePlayer = false;
 
     // ===== API ===== //
 
