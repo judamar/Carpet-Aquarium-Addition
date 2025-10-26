@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class ItemRandomizerHelper {
     public static final File TABLE_DIR = new File("item_randomizer_tables");
-    public static final List<String> MODES = Arrays.asList("create", "insert", "insert_area", "give", "list", "info", "use", "delete", "help");
+    private static final List<String> MODES = Arrays.asList("create", "insert", "insert_area", "give", "shulkerchest", "list", "use", "info", "delete", "help");
     public static final List<String> FILL_MODE = Arrays.asList("full", "random", "random_single", "single_stack", "single_random", "single_stack");
     public static final List<String> CONTAINERS = Arrays.asList("shulker", "chest", "trapped_chest", "hopper", "dropper", "dispenser", "furnace");
 
@@ -71,7 +71,7 @@ public class ItemRandomizerHelper {
                 for (int i = 0; i < inv.getSizeInventory(); i++) {
                     ItemStack stack = inv.getStackInSlot(i);
                     if (!stack.isEmpty()) {
-                        stacks.add(stack.copy());
+                        stacks.add(new ItemStack(stack.getItem(), stack.getCount(), stack.getMetadata()));
                     }
                 }
             }
@@ -89,8 +89,16 @@ public class ItemRandomizerHelper {
 
         for (BlockPos pos : BlockPos.getAllInBox(pos1, pos2)) {
             Item item = Item.getItemFromBlock(world.getBlockState(pos).getBlock());
+            int meta = world.getBlockState(pos).getBlock().getMetaFromState(world.getBlockState(pos));
             if (item != null) {
-                stacks.add(new ItemStack(item));
+                ItemStack testStack = new ItemStack(item, 1, meta);
+                ItemStack meta0Stack = new ItemStack(item, 1, 0);
+
+                if (testStack.getDisplayName().equals(meta0Stack.getDisplayName())) {
+                    meta = 0;
+                }
+
+                stacks.add(new ItemStack(item, 1, meta));
             }
         }
 
@@ -297,6 +305,7 @@ public class ItemRandomizerHelper {
                     base.setCount(1);
                     inv.setInventorySlotContents(i, base);
                 }
+                break;
             case "single":
                 inv.setInventorySlotContents(0, items.get(rand.nextInt(items.size())).copy());
                 break;
@@ -341,6 +350,7 @@ public class ItemRandomizerHelper {
         Messenger.m(sender, "gb ▸ /itemrandomizer insert <mode> <table>", "y - Insert items into container you're looking at");
         Messenger.m(sender, "gb ▸ /itemrandomizer insert_area <mode> x1 y1 z1 x2 y2 z2 <table>", "y - Insert items into containers in area");
         Messenger.m(sender, "gb ▸ /itemrandomizer give <container> <mode> <table>", "y - Give container with items from table");
+        Messenger.m(sender, "gb ▸ /itemrandomizer shulkerchest <table>", "y - Create a chest filled with shulkers filled with random items from the table");
         Messenger.m(sender, "gb ▸ /itemrandomizer list", "y - List all saved tables");
         Messenger.m(sender, "gb ▸ /itemrandomizer info <table>", "y - Show items inside a table");
         Messenger.m(sender, "gb ▸ /itemrandomizer use <insert|give> [container]", "y - Show clickable actions for tables");
@@ -356,6 +366,7 @@ public class ItemRandomizerHelper {
             switch (args[0].toLowerCase()) {
                 case "info":
                 case "delete":
+                case "shulkerchest":
                     return getListOfStringsMatchingLastWord(args, getSavedTables(sender));
                 case "use":
                     return getListOfStringsMatchingLastWord(args, Arrays.asList("insert", "give"));
@@ -429,10 +440,6 @@ public class ItemRandomizerHelper {
 
         return CommandBase.getTabCompletionCoordinate(args, coordSetStart, pos);
     }
-
-
-
-
 
     private static List<String> getListOfStringsMatchingLastWord(String[] args, Collection<String> options) {
         String last = args[args.length - 1].toLowerCase();

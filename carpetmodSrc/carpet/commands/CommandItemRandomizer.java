@@ -7,12 +7,15 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.WorldServer;
 
 import java.io.File;
@@ -26,7 +29,7 @@ public class CommandItemRandomizer extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/itemrandomizer <create|insert|give|list|use|info|delete|help>";
+        return "/itemrandomizer <create|insert|give|shulkerchest|list|use|info|delete|help>";
     }
 
     @Override
@@ -96,9 +99,9 @@ public class CommandItemRandomizer extends CommandCarpetBase {
                         Messenger.m(sender, "r No blocks found in area.");
                     }
                 } else if ((args.length == 4 || args.length == 5) && args[1].equalsIgnoreCase("all_items")) {
-                    String tableName = args[2];
-                    String obtainability = args[3].toLowerCase();
-                    String stackability = args.length == 5 ? args[4].toLowerCase() : "stackables";
+                    String obtainability = args[2].toLowerCase();
+                    String stackability = args.length == 5 ? args[3].toLowerCase() : "stackables";
+                    String tableName = args.length == 5 ? args[4] : args[3];
 
                     List<ItemStack> items = ItemRandomizerHelper.getFilteredAllItems(obtainability, stackability);
 
@@ -201,7 +204,59 @@ public class CommandItemRandomizer extends CommandCarpetBase {
 
                 Messenger.m(sender, "g Given item with content from ", "w " + tableName);
 
-            } else if (sub.equalsIgnoreCase("list")) {
+            } else if (sub.equals("shulkerchest")) {
+                if (args.length != 2) {
+                    Messenger.m(sender, "r Usage: /itemrandomizer shulkerchest <table>");
+                    return;
+                }
+
+                String tableName = args[1];
+                List<ItemStack> allItems = ItemRandomizerHelper.loadTable(tableName);
+
+                if (allItems == null || allItems.isEmpty()) {
+                    Messenger.m(sender, "r Table not found or is empty: ", "w " + tableName);
+                    return;
+                }
+
+                if (allItems == null || allItems.isEmpty()) {
+                    Messenger.m(sender, "r No items found.");
+                    return;
+                }
+
+                EnumFacing facing = player.getHorizontalFacing();
+                BlockPos startPos = player.getPosition().add(facing.getXOffset(), 0, facing.getZOffset());
+
+                BlockPos otherHalf = startPos.add(1, 0, 0);
+
+                world.setBlockState(startPos, Blocks.CHEST.getDefaultState().withProperty(net.minecraft.block.BlockChest.FACING, facing));
+                world.setBlockState(otherHalf, Blocks.CHEST.getDefaultState().withProperty(net.minecraft.block.BlockChest.FACING, facing));
+
+                TileEntity tile1 = world.getTileEntity(startPos);
+                TileEntity tile2 = world.getTileEntity(otherHalf);
+
+                if (tile1 instanceof IInventory && tile2 instanceof IInventory) {
+                    IInventory largeChest = new net.minecraft.inventory.InventoryLargeChest("container.chestDouble", (ILockableContainer) tile1, (ILockableContainer) tile2);
+
+                    for (int i = 0; i < largeChest.getSizeInventory(); i++) {
+                        List<ItemStack> shuffled = new ArrayList<>(allItems);
+                        Collections.shuffle(shuffled);
+                        List<ItemStack> contents = shuffled.subList(0, Math.min(27, shuffled.size()));
+                        ItemStack shulker = ItemRandomizerHelper.createContainerWithItems(
+                                Item.getItemFromBlock(Blocks.PURPLE_SHULKER_BOX), contents, "random", "auto");
+                        largeChest.setInventorySlotContents(i, shulker);
+                    }
+
+                    ((TileEntity) tile1).markDirty();
+                    ((TileEntity) tile2).markDirty();
+                    world.markChunkDirty(startPos, tile1);
+                    world.markChunkDirty(otherHalf, tile2);
+
+                    Messenger.m(sender, "g Double chest filled with random shulkers created.");
+                } else {
+                    Messenger.m(sender, "r Could not place or access double chest.");
+                }
+            }
+            else if (sub.equalsIgnoreCase("list")) {
                 List<String> tables = ItemRandomizerHelper.getSavedTables(sender);
                 if (tables.isEmpty()) {
                     Messenger.m(sender, "r No tables found.");

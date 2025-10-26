@@ -37,6 +37,25 @@ public class GetAllItemsHelper {
             "minecraft:monster_egg"
     ));
 
+    private static final Set<String> SHULKERS = new HashSet<>(Arrays.asList(
+            "minecraft:white_shulker_box",
+            "minecraft:orange_shulker_box",
+            "minecraft:magenta_shulker_box",
+            "minecraft:light_blue_shulker_box",
+            "minecraft:yellow_shulker_box",
+            "minecraft:lime_shulker_box",
+            "minecraft:pink_shulker_box",
+            "minecraft:gray_shulker_box",
+            "minecraft:silver_shulker_box",
+            "minecraft:cyan_shulker_box",
+            "minecraft:purple_shulker_box",
+            "minecraft:blue_shulker_box",
+            "minecraft:brown_shulker_box",
+            "minecraft:green_shulker_box",
+            "minecraft:red_shulker_box",
+            "minecraft:black_shulker_box"
+    ));
+
     private static final Set<String> JUNK_ITEMS = new HashSet<>(Arrays.asList(
             "minecraft:filled_map",
             "minecraft:written_book",
@@ -57,6 +76,7 @@ public class GetAllItemsHelper {
     public static List<String> getStackabilityOptions() {
         return Arrays.asList(
                 "stackables",
+                "any",
                 "64_stackables",
                 "16_stackables",
                 "unstackables");
@@ -145,9 +165,11 @@ public class GetAllItemsHelper {
 
         switch (obtainability) {
             case "everything":
-                return true;
+                if (SHULKERS.contains(id))
+                    return false;
+                break;
             case "main_storage":
-                if (SURVIVAL_UNOBTAINABLE.contains(id) || JUNK_ITEMS.contains(id) || id.contains("shulker_box"))
+                if (SURVIVAL_UNOBTAINABLE.contains(id) || JUNK_ITEMS.contains(id) || SHULKERS.contains(id))
                     return false;
                 break;
             case "survival_obtainables":
@@ -160,6 +182,7 @@ public class GetAllItemsHelper {
 
         switch (stackability) {
             case "stackables": return maxStack == 16 || maxStack == 64;
+            case "any": return maxStack == 16 || maxStack == 64 || maxStack == 1;
             case "64_stackables": return maxStack == 64;
             case "16_stackables": return maxStack == 16;
             case "unstackables": return maxStack == 1;

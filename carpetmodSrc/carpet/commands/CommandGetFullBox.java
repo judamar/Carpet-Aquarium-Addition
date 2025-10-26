@@ -27,7 +27,7 @@ public class CommandGetFullBox extends CommandCarpetBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if (!command_enabled("commandGetFullBox", sender)) {
+        if (command_enabled("commandGetFullBox", sender)) {
             if (!(sender instanceof EntityPlayerMP))
                 throw new CommandException("Only players can use this command");
 
