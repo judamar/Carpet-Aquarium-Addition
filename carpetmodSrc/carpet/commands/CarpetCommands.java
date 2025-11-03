@@ -12,6 +12,7 @@ public class CarpetCommands {
         // For Xcom: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
         handler.registerCommand(new CommandAutosave());
+        handler.registerCommand(new CommandBitPattern()); //AQ_CM - Storage
         handler.registerCommand(new CommandBlockInfo());
         handler.registerCommand(new CommandCarpet());
         handler.registerCommand(new CommandCenter());
@@ -22,17 +23,21 @@ public class CarpetCommands {
         handler.registerCommand(new CommandCounter());
         handler.registerCommand(new CommandDebugCarpet());
         handler.registerCommand(new CommandDebuglogger());
+        handler.registerCommand(new CommandDelimit());
         handler.registerCommand(new CommandDistance());
         handler.registerCommand(new CommandEntityInfo());
         handler.registerCommand(new CommandEntityTask());
         handler.registerCommand(new CommandFeel());
         handler.registerCommand(new CommandFill13());
         handler.registerCommand(new CommandFillBiome());
+        handler.registerCommand(new CommandGetAllItems()); //AQ_CM - Storage
+        handler.registerCommand(new CommandGetFullBox()); //AQ_CM - Storage
         handler.registerCommand(new CommandGMC());
         handler.registerCommand(new CommandGMS());
         handler.registerCommand(new CommandGrow());
         if (CarpetSettings.INTERNAL_BUILD) handler.registerCommand(new CommandIngameTest());
         handler.registerCommand(new CommandInventory());//Bullet (coded by slowik)
+        handler.registerCommand(new CommandItemRandomizer()); //AQ_CM - Storage
         handler.registerCommand(new CommandLagSpike());
         handler.registerCommand(new CommandLazyChunkBehavior());
         handler.registerCommand(new CommandLight());

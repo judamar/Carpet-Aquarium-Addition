@@ -37,13 +37,12 @@ import net.minecraft.server.MinecraftServer;
 
 import static carpet.CarpetSettings.RuleCategory.*;
 
-public class CarpetSettings
-{
+public class CarpetSettings {
     public static final boolean INTERNAL_BUILD = false;
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.1.1";
+    public static final String tagVersion = "v0.1.2";
     public static final String carpetVersion = "Carpet Aquarium Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
@@ -220,6 +219,7 @@ public class CarpetSettings
             "Set to 0 to disable Scoreboard delta display."
     })
     public static int scoreboardDelta = 0;
+
     private static boolean validateScoreboardDelta(int value) {
         if(value == 0) {
             scoreboardDelta = 0;
@@ -928,17 +928,6 @@ public class CarpetSettings
     public static boolean watchdogFix = false;
 
 
-
-
-
-
-
-
-
-
-
-
-
     @Rule(desc = "Prevents players from rubberbanding when moving too fast", category = {CREATIVE, SURVIVAL})
     @CreativeDefault
     public static boolean antiCheatSpeed = false;
@@ -948,18 +937,9 @@ public class CarpetSettings
     public static boolean calmNetherFires = false;
 
 
-
-
-
-
-
-
-
-
     @Rule(desc = "Recovers potion effects when they were replaced and the replacement ended", category = FIX)
     @BugFixDefault
     public static boolean effectsFix = false;
-
 
 
     @Rule(desc = "Players go invisible when dying or using portals.", category = FIX)
@@ -1078,8 +1058,6 @@ public class CarpetSettings
     public static boolean isRainyaphthylCute = true; */
 
 
-
-
     @Rule(desc = "Dropping entire stacks works also from on the crafting UI result slot", category = {FIX, SURVIVAL})
     @SurvivalDefault
     public static boolean ctrlQCraftingFix = false;
@@ -1165,8 +1143,6 @@ public class CarpetSettings
     public static boolean portalCaching = false;
 
 
-
-
     @Rule(desc = "sponge responds to random ticks", category = {EXPERIMENTAL, FEATURE}, validator = "validateSpongeRandom")
     public static boolean spongeRandom = false;
     private static boolean validateSpongeRandom(boolean value) {
@@ -1187,7 +1163,6 @@ public class CarpetSettings
     public static boolean dispenserMinecartFiller;
 
 
-
     @Rule(desc = "Redstone ore blocks can redirect redstone dust", category = {EXPERIMENTAL, FEATURE})
     public static boolean redstoneOreRedirectsDust = false;
 
@@ -1202,7 +1177,6 @@ public class CarpetSettings
 
     @Rule(desc = "Disables placement of the bedrock item", category = FEATURE)
     public static boolean disableBedrockPlacement = false;
-
 
 
     @Rule(desc = "Removes tnt applying velocity to other entities.", category = CREATIVE)
@@ -1230,7 +1204,6 @@ public class CarpetSettings
 
     @Rule(desc = "/tick commands other than /tick health and /tick entities require admin permission to run", category = {FIX, VASTECH})
     public static boolean mostTickCommandsRequireAdmin = true;
-
 
 
     @Rule(desc = "Enables/disables village ticking", category = {CREATIVE, VASTECH})
@@ -1366,10 +1339,10 @@ public class CarpetSettings
     @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
     public static boolean playerCanPlaceCommandBlocks = false;
 
-    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17",category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17", category = {AQUARIUM, FEATURE})
     public static boolean shulkerBoxContentDropBackport = false;
 
-    @Rule(desc="Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
     public static boolean minecartFullDropBackport = false;
 
     @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
@@ -1389,6 +1362,24 @@ public class CarpetSettings
 
     @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE})
     public static boolean creativeOpenContainerForcibly = false;
+
+    @Rule(desc = "Enables /delimit command to calculate the limits of a perimeter by taking the center coordinate and radius (X, Z, radius).", category = {AQUARIUM, COMMANDS})
+    public static boolean commandDelimit = false;
+
+    @Rule(desc = "Enables /bitpattern to create a matrix of binary combinations.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandBitPattern = false;
+
+    @Rule(desc = "Enables /getfullbox to create a shulker box fully with specified item.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandGetFullBox = false;
+
+    @Rule(desc = "Enables /getallitems to create a chest with all items of the game, can be filtered", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandGetAllItems = false;
+
+    @Rule(desc = "Enables /itemrandomizer to manage and apply item tables (collections of ItemStacks) into containers, blocks, or inventories using various strategies.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandItemRandomizer = false;
+
+    @Rule(desc = "Prevents void damage for players", category = {AQUARIUM, EXPERIMENTAL, SURVIVAL})
+    public static boolean voidDamageIgnorePlayer = false;
 
     // ===== API ===== //
 
@@ -1462,7 +1453,7 @@ public class CarpetSettings
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE
     }
 
     private static boolean validatePositive(int value) {
