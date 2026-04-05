@@ -1378,6 +1378,9 @@ public class CarpetSettings {
     @Rule(desc = "Enables /itemrandomizer to manage and apply item tables (collections of ItemStacks) into containers, blocks, or inventories using various strategies.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandItemRandomizer = false;
 
+    @Rule(desc = "Enables /period, A tool to measure how often a redstone component is activated.", category = {AQUARIUM, CREATIVE, COMMANDS})
+    public static boolean commandPeriod = false;
+
     @Rule(desc = "Prevents void damage for players", category = {AQUARIUM, EXPERIMENTAL, SURVIVAL})
     public static boolean voidDamageIgnorePlayer = false;
 
