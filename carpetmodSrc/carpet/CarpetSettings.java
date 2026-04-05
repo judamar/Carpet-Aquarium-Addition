@@ -1384,6 +1384,15 @@ public class CarpetSettings {
     @Rule(desc = "Prevents void damage for players", category = {AQUARIUM, EXPERIMENTAL, SURVIVAL})
     public static boolean voidDamageIgnorePlayer = false;
 
+    @Rule(desc = "Clears AI task references when an entity is removed, preventing memory leaks", category = {FIX, AQUARIUM, OPTIMIZATIONS})
+    public static boolean entityBrainMemoryUnfreedFix = false;
+
+    @Rule(desc = "Entities are removed immediately upon death instead of waiting 20 ticks", category = {AQUARIUM, OPTIMIZATIONS})
+    public static boolean entityInstantDeathRemoval = false;
+
+    //@Rule(desc = "Allow horizontally moving Ender Pearls to load chunks as entity ticking", category = {AQUARIUM, EXPERIMENTAL})
+    //public static boolean enderPearlChunkLoading = false;
+
     // ===== API ===== //
 
     /**

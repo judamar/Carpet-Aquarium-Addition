@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAITasks.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAITasks.java
-@@ -1,23 +1,32 @@
+@@ -1,23 +1,33 @@
  package net.minecraft.entity.ai;
  
 +import carpet.logging.LoggerRegistry;
@@ -19,8 +19,10 @@
  public class EntityAITasks
  {
      private static final Logger field_151506_a = LogManager.getLogger();
-     private final Set<EntityAITasks.EntityAITaskEntry> field_75782_a = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
+-    private final Set<EntityAITasks.EntityAITaskEntry> field_75782_a = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
 -    private final Set<EntityAITasks.EntityAITaskEntry> field_75780_b = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
++    //AQ_CM - changed access
++    public final Set<EntityAITasks.EntityAITaskEntry> field_75782_a = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
 +    // VasCM - changed access
 +    public final Set<EntityAITasks.EntityAITaskEntry> field_75780_b = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
      private final Profiler field_75781_c;
@@ -34,7 +36,7 @@
      public EntityAITasks(Profiler p_i1628_1_)
      {
          this.field_75781_c = p_i1628_1_;
-@@ -60,22 +69,27 @@
+@@ -60,22 +70,27 @@
          {
              for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.field_75782_a)
              {
@@ -64,7 +66,7 @@
          }
          else
          {
-@@ -102,8 +116,12 @@
+@@ -102,8 +117,12 @@
  
              for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry2 : this.field_75780_b)
              {
@@ -77,7 +79,7 @@
  
              this.field_75781_c.func_76319_b();
          }
-@@ -111,33 +129,46 @@
+@@ -111,33 +130,46 @@
  
      private boolean func_75773_a(EntityAITasks.EntityAITaskEntry p_75773_1_)
      {
@@ -132,7 +134,7 @@
                      {
                          return false;
                      }
-@@ -147,6 +178,7 @@
+@@ -147,6 +179,7 @@
              return true;
          }
      }
@@ -140,7 +142,7 @@
  
      private boolean func_75777_a(EntityAITasks.EntityAITaskEntry p_75777_1_, EntityAITasks.EntityAITaskEntry p_75777_2_)
      {
-@@ -180,7 +212,7 @@
+@@ -180,7 +213,7 @@
          }
      }
  

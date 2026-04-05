@@ -30,6 +30,15 @@
      }
  
      protected void func_70088_a()
+@@ -373,7 +382,7 @@
+     {
+         ++this.field_70725_aQ;
+ 
+-        if (this.field_70725_aQ == 20)
++        if (this.field_70725_aQ == (CarpetSettings.entityInstantDeathRemoval ? this.field_70725_aQ : 20))
+         {
+             if (!this.field_70170_p.field_72995_K && (this.func_70684_aJ() || this.field_70718_bc > 0 && this.func_146066_aG() && this.field_70170_p.func_82736_K().func_82766_b("doMobLoot")))
+             {
 @@ -401,6 +410,7 @@
  
      protected boolean func_146066_aG()
