@@ -42,7 +42,7 @@ public class CarpetSettings {
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.1.2";
+    public static final String tagVersion = "v0.1.3";
     public static final String carpetVersion = "Carpet Aquarium Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
@@ -1133,9 +1133,14 @@ public class CarpetSettings {
     @SurvivalDefault
     public static boolean carpets = false;
 
-    @Rule(desc = "Pistons, Glass and Sponge can be broken faster with their appropriate tools", category = SURVIVAL)
+    @Rule(desc = "Pistons, Glass and Sponge can be broken faster with their appropriate tools", category = SURVIVAL, extra = {
+            "Players must also run /subscribe missingTools to get the faster mining"
+    })
     @SurvivalDefault
     public static boolean missingTools = false;
+
+    // AqCM - set only while EntityPlayer.getDigSpeed runs, true if the digging player is subscribed to missingTools
+    public static boolean missingToolsActive = false;
 
     @Rule(desc = "Alternative caching strategy for nether portals", category = {SURVIVAL, EXPERIMENTAL})
     @CreativeDefault

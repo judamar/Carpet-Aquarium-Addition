@@ -59,7 +59,18 @@
                  }
  
                  this.func_71029_a(StatList.field_75952_v);
-@@ -885,6 +905,9 @@
+@@ -710,7 +730,10 @@
+ 
+     public float func_184813_a(IBlockState p_184813_1_)
+     {
++        carpet.logging.Logger missingToolsLogger = LoggerRegistry.getLogger("missingTools"); //AqCM
++        CarpetSettings.missingToolsActive = CarpetSettings.missingTools && this instanceof EntityPlayerMP && missingToolsLogger != null && missingToolsLogger.subscribed((EntityPlayerMP)this); //AqCM
+         float f = this.field_71071_by.func_184438_a(p_184813_1_);
++        CarpetSettings.missingToolsActive = false; //AqCM
+ 
+         if (f > 1.0F)
+         {
+@@ -885,6 +908,9 @@
  
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
@@ -69,7 +80,7 @@
          if (this.func_180431_b(p_70097_1_))
          {
              return false;
-@@ -908,10 +931,23 @@
+@@ -908,10 +934,23 @@
                      this.func_70999_a(true, true, false);
                  }
  
@@ -94,7 +105,7 @@
                      if (this.field_70170_p.func_175659_aa() == EnumDifficulty.PEACEFUL)
                      {
                          p_70097_2_ = 0.0F;
-@@ -926,6 +962,7 @@
+@@ -926,6 +965,7 @@
                      {
                          p_70097_2_ = p_70097_2_ * 3.0F / 2.0F;
                      }
@@ -102,7 +113,7 @@
                  }
  
                  return p_70097_2_ == 0.0F ? false : super.func_70097_a(p_70097_1_, p_70097_2_);
-@@ -1008,16 +1045,22 @@
+@@ -1008,16 +1048,22 @@
      {
          if (!this.func_180431_b(p_70665_1_))
          {
@@ -125,7 +136,7 @@
                  this.func_70606_j(this.func_110143_aJ() - p_70665_2_);
                  this.func_110142_aN().func_94547_a(p_70665_1_, f1, p_70665_2_);
  
-@@ -1027,6 +1070,12 @@
+@@ -1027,6 +1073,12 @@
                  }
              }
          }
@@ -138,7 +149,7 @@
      }
  
      public void func_175141_a(TileEntitySign p_175141_1_)
-@@ -1227,19 +1276,33 @@
+@@ -1227,19 +1279,33 @@
                          {
                              float f3 = 1.0F + EnchantmentHelper.func_191527_a(this) * f;
  
@@ -172,7 +183,7 @@
                          if (p_71059_1_ instanceof EntityPlayerMP && p_71059_1_.field_70133_I)
                          {
                              ((EntityPlayerMP)p_71059_1_).field_71135_a.func_147359_a(new SPacketEntityVelocity(p_71059_1_));
-@@ -1333,6 +1396,13 @@
+@@ -1333,6 +1399,13 @@
                      }
                  }
              }
@@ -186,7 +197,7 @@
          }
      }
  
-@@ -1495,7 +1565,7 @@
+@@ -1495,7 +1568,7 @@
  
          if (this.field_71081_bT != null && iblockstate.func_177230_c() == Blocks.field_150324_C)
          {
@@ -195,7 +206,7 @@
              BlockPos blockpos = BlockBed.func_176468_a(this.field_70170_p, this.field_71081_bT, 0);
  
              if (blockpos == null)
-@@ -1911,6 +1981,10 @@
+@@ -1911,6 +1984,10 @@
          {
              return false;
          }
@@ -206,7 +217,7 @@
          else
          {
              BlockPos blockpos = p_175151_1_.func_177972_a(p_175151_2_.func_176734_d());
-@@ -2044,6 +2118,20 @@
+@@ -2044,6 +2121,20 @@
          this.func_192031_i(new NBTTagCompound());
      }
  
@@ -227,7 +238,7 @@
      private void func_192026_k(@Nullable NBTTagCompound p_192026_1_)
      {
          if (!this.field_70170_p.field_72995_K && !p_192026_1_.func_82582_d())
-@@ -2303,10 +2391,18 @@
+@@ -2303,10 +2394,18 @@
          return (float)this.func_110148_a(SharedMonsterAttributes.field_188792_h).func_111126_e();
      }
  
@@ -247,7 +258,7 @@
  
      public static enum EnumChatVisibility
      {
-@@ -2333,11 +2429,11 @@
+@@ -2333,11 +2432,11 @@
          }
      }
  
