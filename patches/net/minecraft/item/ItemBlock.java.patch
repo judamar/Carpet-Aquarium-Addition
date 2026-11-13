@@ -44,3 +44,12 @@
              }
  
              return EnumActionResult.SUCCESS;
+@@ -106,7 +124,7 @@
+ 
+                     if (!nbttagcompound1.equals(nbttagcompound2))
+                     {
+-                        tileentity.func_145839_a(nbttagcompound1);
++                        carpet.helpers.ShadowItems.readTileEntity(tileentity, nbttagcompound1); //AqCM
+                         tileentity.func_70296_d();
+                         return true;
+                     }

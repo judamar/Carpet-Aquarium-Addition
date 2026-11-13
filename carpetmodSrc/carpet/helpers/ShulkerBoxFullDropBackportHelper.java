@@ -63,7 +63,7 @@ public class ShulkerBoxFullDropBackportHelper
                 for (int i = 0; i < itemsTag.tagCount(); i++)
                 {
                     NBTTagCompound itemTag = itemsTag.getCompoundTagAt(i);
-                    ItemStack stack = new ItemStack(itemTag);
+                    ItemStack stack = carpet.helpers.ShadowItems.load(itemTag);
                     if (!stack.isEmpty())
                     {
                         EntityItem dropped = new EntityItem(

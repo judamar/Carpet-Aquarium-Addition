@@ -76,7 +76,15 @@
                              {
                                  list.add(blockpos4);
                                  ++i;
-@@ -173,12 +190,17 @@
+@@ -166,19 +183,24 @@
+                                         nbttagcompound.func_74768_a("x", blockpos4.func_177958_n());
+                                         nbttagcompound.func_74768_a("y", blockpos4.func_177956_o());
+                                         nbttagcompound.func_74768_a("z", blockpos4.func_177952_p());
+-                                        tileentity.func_145839_a(nbttagcompound);
++                                        carpet.helpers.ShadowItems.readTileEntity(tileentity, nbttagcompound); //AqCM
+                                     }
+                                 }
+                             }
                          }
                      }
                  }

@@ -201,6 +201,15 @@
  
                                      if (tileentity != null)
                                      {
+@@ -199,7 +285,7 @@
+                                             }
+                                         }
+ 
+-                                        tileentity.func_145839_a(nbttagcompound);
++                                        carpet.helpers.ShadowItems.readTileEntity(tileentity, nbttagcompound); //AqCM
+                                         tileentity.func_70296_d();
+                                     }
+                                 }
 @@ -211,7 +297,7 @@
                          }
                          else if (block instanceof BlockFalling)

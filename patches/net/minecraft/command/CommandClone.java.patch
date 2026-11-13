@@ -82,7 +82,14 @@
                              for (CommandClone.StaticCloneData commandclone$staticclonedata2 : list1)
                              {
                                  TileEntity tileentity3 = world.func_175625_s(commandclone$staticclonedata2.field_179537_a);
-@@ -206,7 +213,11 @@
+@@ -200,13 +207,17 @@
+                                     commandclone$staticclonedata2.field_184953_c.func_74768_a("x", commandclone$staticclonedata2.field_179537_a.func_177958_n());
+                                     commandclone$staticclonedata2.field_184953_c.func_74768_a("y", commandclone$staticclonedata2.field_179537_a.func_177956_o());
+                                     commandclone$staticclonedata2.field_184953_c.func_74768_a("z", commandclone$staticclonedata2.field_179537_a.func_177952_p());
+-                                    tileentity3.func_145839_a(commandclone$staticclonedata2.field_184953_c);
++                                    carpet.helpers.ShadowItems.readTileEntity(tileentity3, commandclone$staticclonedata2.field_184953_c); //AqCM
+                                     tileentity3.func_70296_d();
+                                 }
  
                                  world.func_180501_a(commandclone$staticclonedata2.field_179537_a, commandclone$staticclonedata2.field_179535_b, 2);
                              }

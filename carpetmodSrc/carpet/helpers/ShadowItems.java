@@ -72,6 +72,9 @@ public class ShadowItems {
         CarpetSettings.LOG.warn("New Shadow Item Created");
         String id = shadow.getShadowId();
         getByIdOrAdd(id == null ? newId() : id, shadow);
+        // the id was assigned after the stack was already in slots: record its membership now (shadowItemUpdateFix)
+        for (Slot slot : container.inventorySlots) for (int i = 0; i < slot.inventory.getSizeInventory(); i++) if (slot.inventory.getStackInSlot(i) == shadow) shadow.addSlot(slot.inventory, i);
+        for (int i = 0; i < player.inventory.getSizeInventory(); i++) if (player.inventory.getStackInSlot(i) == shadow) shadow.addSlot(player.inventory, i);
         return CarpetSettings.shadowItemMode != CarpetSettings.ShadowItemMode.UNLINK;
     }
 
@@ -82,6 +85,7 @@ public class ShadowItems {
         if (stack.isEmpty()) {
             // ItemStack.EMPTY is never given an id; an emptied shadow stack leaves the registry
             if (registry.getIfPresent(id) == stack) registry.invalidate(id);
+            stack.setShadowId(null);
             return;
         }
         if (registry.getIfPresent(id) == stack) nbt.setString("shadow", id);
@@ -113,6 +117,15 @@ public class ShadowItems {
                 try { inv.markDirty(); } catch (Throwable t) { CarpetSettings.LOG.error("Failed to update shadow inventory", t); }
             }
         } finally { toUpdate.clear(); }
+    }
+
+    /** TileEntity.readFromNBT that re-tracks shadow stack slots (upstream loaders/*). */
+    public static void readTileEntity(net.minecraft.tileentity.TileEntity te, NBTTagCompound nbt) {
+        if (!CarpetSettings.shadowItemUpdateFix || !(te instanceof net.minecraft.inventory.IInventory)) { te.readFromNBT(nbt); return; }
+        net.minecraft.inventory.IInventory inv = (net.minecraft.inventory.IInventory) te;
+        try { for (int i = 0; i < inv.getSizeInventory(); i++) inv.getStackInSlot(i).removeSlot(inv, i); } catch (Exception ignored) {}
+        te.readFromNBT(nbt);
+        try { for (int i = 0; i < inv.getSizeInventory(); i++) inv.getStackInSlot(i).addSlot(inv, i); } catch (Exception ignored) {}
     }
 
     /** Hoppers/droppers move shadow stacks by instance instead of by copy. */

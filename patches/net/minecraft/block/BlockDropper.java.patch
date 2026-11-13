@@ -46,7 +46,7 @@
          BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_176439_1_, p_176439_2_);
          TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();
  
-@@ -42,6 +64,11 @@
+@@ -42,6 +64,14 @@
              else
              {
                  ItemStack itemstack = tileentitydispenser.func_70301_a(i);
@@ -54,11 +54,14 @@
 +                        || (CarpetSettings.dropperNoItemCost == CarpetSettings.HopperCounters.wool
 +                        && p_176439_1_.func_180495_p(p_176439_2_.func_177977_b()).func_177230_c() != Blocks.field_150325_L);
 +                ItemStack oldStack = null;
-+                if (!takesItem) oldStack = itemstack.func_77946_l();
++                int oldCount = itemstack.func_190916_E(); //AqCM
++                boolean keepShadow = !takesItem && carpet.helpers.ShadowItems.transferFix(itemstack); //AqCM
++                if (keepShadow) oldStack = itemstack; //AqCM keep the shared instance
++                else if (!takesItem) oldStack = itemstack.func_77946_l();
  
                  if (!itemstack.func_190926_b())
                  {
-@@ -56,10 +83,16 @@
+@@ -56,10 +86,16 @@
                      }
                      else
                      {
@@ -77,13 +80,13 @@
                              itemstack1 = itemstack.func_77946_l();
                              itemstack1.func_190918_g(1);
                          }
-@@ -69,9 +102,85 @@
+@@ -69,9 +105,85 @@
                          }
                      }
  
 -                    tileentitydispenser.func_70299_a(i, itemstack1);
 +                    if (takesItem) tileentitydispenser.func_70299_a(i, itemstack1);
-+                    else tileentitydispenser.func_70299_a(i, oldStack);
++                    else { if (keepShadow) oldStack.func_190920_e(oldCount); tileentitydispenser.func_70299_a(i, oldStack); } //AqCM
                  }
              }
          }
