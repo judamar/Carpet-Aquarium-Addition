@@ -155,7 +155,27 @@
          this.func_77973_b().func_77622_d(this, p_77980_1_, p_77980_2_);
      }
  
-@@ -881,4 +902,10 @@
+@@ -866,8 +887,19 @@
+         return this.field_190928_g ? 0 : this.field_77994_a;
+     }
+ 
++    //AqCM - slots holding this shadow stack, for shadowItemUpdateFix
++    private final java.util.Map<net.minecraft.inventory.IInventory, java.util.Set<Integer>> shadowSlots = new java.util.IdentityHashMap<>();
++    public void addSlot(net.minecraft.inventory.IInventory inv, int slot) { if (this.shadowId != null && !this.func_190926_b()) shadowSlots.computeIfAbsent(inv, k -> new java.util.HashSet<>()).add(slot); }
++    public void removeSlot(net.minecraft.inventory.IInventory inv, int slot)
++    {
++        java.util.Set<Integer> s = shadowSlots.get(inv);
++        if (s != null) { s.remove(slot); if (s.isEmpty()) shadowSlots.remove(inv); }
++    }
++    public java.util.Collection<net.minecraft.inventory.IInventory> getInventories() { return shadowSlots.keySet(); }
++
+     public void func_190920_e(int p_190920_1_)
+     {
++        if (carpet.CarpetSettings.shadowItemUpdateFix && this.shadowId != null) carpet.helpers.ShadowItems.toUpdate.addAll(this.shadowSlots.keySet()); //AqCM
+         this.field_77994_a = p_190920_1_;
+         this.func_190923_F();
+     }
+@@ -881,4 +913,10 @@
      {
          this.func_190917_f(-p_190918_1_);
      }

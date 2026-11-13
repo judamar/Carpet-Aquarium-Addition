@@ -200,7 +200,7 @@
          }
          else
          {
-@@ -352,6 +453,11 @@
+@@ -352,9 +453,15 @@
      {
          ItemStack itemstack = p_174915_1_.func_70301_a(p_174915_2_);
  
@@ -211,8 +211,32 @@
 +
          if (!itemstack.func_190926_b() && func_174921_b(p_174915_1_, itemstack, p_174915_2_, p_174915_3_))
          {
-             ItemStack itemstack1 = itemstack.func_77946_l();
-@@ -499,6 +605,14 @@
+-            ItemStack itemstack1 = itemstack.func_77946_l();
++            boolean shadow = carpet.helpers.ShadowItems.transferFix(itemstack); //AqCM
++            ItemStack itemstack1 = shadow ? itemstack : itemstack.func_77946_l(); //AqCM
+             ItemStack itemstack2 = func_174918_a(p_174915_1_, p_174915_0_, p_174915_1_.func_70298_a(p_174915_2_, 1), (EnumFacing)null);
+ 
+             if (itemstack2.func_190926_b())
+@@ -363,7 +470,8 @@
+                 return true;
+             }
+ 
+-            p_174915_1_.func_70299_a(p_174915_2_, itemstack1);
++            if (shadow && p_174915_1_.func_70301_a(p_174915_2_) == itemstack1) itemstack1.func_190917_f(1); //AqCM keep the shared instance
++            else p_174915_1_.func_70299_a(p_174915_2_, itemstack1);
+         }
+ 
+         return false;
+@@ -379,7 +487,7 @@
+         }
+         else
+         {
+-            ItemStack itemstack = p_145898_2_.func_92059_d().func_77946_l();
++            ItemStack itemstack = carpet.helpers.ShadowItems.transferFix(p_145898_2_.func_92059_d()) ? p_145898_2_.func_92059_d() : p_145898_2_.func_92059_d().func_77946_l(); //AqCM
+             ItemStack itemstack1 = func_174918_a(p_145898_0_, p_145898_1_, itemstack, (EnumFacing)null);
+ 
+             if (itemstack1.func_190926_b())
+@@ -499,6 +607,14 @@
          return func_145893_b(this.func_145831_w(), this.func_96107_aA() + (double)enumfacing.func_82601_c(), this.func_96109_aB() + (double)enumfacing.func_96559_d(), this.func_96108_aC() + (double)enumfacing.func_82599_e());
      }
  
@@ -227,7 +251,7 @@
      public static IInventory func_145884_b(IHopper p_145884_0_)
      {
          return func_145893_b(p_145884_0_.func_145831_w(), p_145884_0_.func_96107_aA(), p_145884_0_.func_96109_aB() + 1.0D, p_145884_0_.func_96108_aC());
-@@ -535,7 +649,8 @@
+@@ -535,7 +651,8 @@
  
          if (iinventory == null)
          {
@@ -237,7 +261,7 @@
  
              if (!list.isEmpty())
              {
-@@ -546,7 +661,7 @@
+@@ -546,7 +663,7 @@
          return iinventory;
      }
  
@@ -246,7 +270,7 @@
      {
          if (p_145894_0_.func_77973_b() != p_145894_1_.func_77973_b())
          {
-@@ -562,7 +677,7 @@
+@@ -562,7 +679,7 @@
          }
          else
          {
@@ -255,7 +279,7 @@
          }
      }
  
-@@ -611,4 +726,15 @@
+@@ -611,4 +728,15 @@
      {
          return this.field_145900_a;
      }

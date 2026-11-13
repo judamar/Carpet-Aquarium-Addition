@@ -58,7 +58,26 @@
  
                  if (!itemstack.func_190926_b())
                  {
-@@ -69,9 +96,85 @@
+@@ -56,10 +83,16 @@
+                     }
+                     else
+                     {
+-                        itemstack1 = TileEntityHopper.func_174918_a(tileentitydispenser, iinventory, itemstack.func_77946_l().func_77979_a(1), enumfacing.func_176734_d());
++                        boolean shadow = carpet.helpers.ShadowItems.transferFix(itemstack); //AqCM
++                        itemstack1 = TileEntityHopper.func_174918_a(tileentitydispenser, iinventory, shadow ? itemstack.func_77979_a(1) : itemstack.func_77946_l().func_77979_a(1), enumfacing.func_176734_d()); //AqCM
+ 
+-                        if (itemstack1.func_190926_b())
++                        if (shadow) //AqCM
+                         {
++                            if (!itemstack1.func_190926_b()) itemstack.func_190917_f(1);
++                            itemstack1 = itemstack;
++                        }
++                        else if (itemstack1.func_190926_b())
++                        {
+                             itemstack1 = itemstack.func_77946_l();
+                             itemstack1.func_190918_g(1);
+                         }
+@@ -69,9 +102,85 @@
                          }
                      }
  
