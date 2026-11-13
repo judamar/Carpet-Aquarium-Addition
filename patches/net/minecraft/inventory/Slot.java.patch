@@ -1,0 +1,14 @@
+--- ../src-base/minecraft/net/minecraft/inventory/Slot.java
++++ ../src-work/minecraft/net/minecraft/inventory/Slot.java
+@@ -85,6 +85,11 @@
+ 
+     public ItemStack func_75209_a(int p_75209_1_)
+     {
++        //AqCM - whole shadow stack moves keep the instance
++        if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(this.func_75211_c()) && p_75209_1_ >= this.func_75211_c().func_190916_E())
++        {
++            return this.field_75224_c.func_70304_b(this.field_75225_a);
++        }
+         return this.field_75224_c.func_70298_a(this.field_75225_a, p_75209_1_);
+     }
+ 

@@ -246,6 +246,15 @@
      {
          if (p_145894_0_.func_77973_b() != p_145894_1_.func_77973_b())
          {
+@@ -562,7 +677,7 @@
+         }
+         else
+         {
+-            return ItemStack.func_77970_a(p_145894_0_, p_145894_1_);
++            return carpet.helpers.ShadowItems.mergeCheck(p_145894_0_, p_145894_1_, ItemStack.func_77970_a(p_145894_0_, p_145894_1_)); //AqCM
+         }
+     }
+ 
 @@ -611,4 +726,15 @@
      {
          return this.field_145900_a;

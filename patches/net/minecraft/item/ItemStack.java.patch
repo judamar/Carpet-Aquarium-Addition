@@ -8,7 +8,15 @@
  import com.google.common.collect.HashMultimap;
  import com.google.common.collect.Multimap;
  import java.text.DecimalFormat;
-@@ -41,6 +43,8 @@
+@@ -15,6 +17,7 @@
+ import net.minecraft.entity.EntityLivingBase;
+ import net.minecraft.entity.SharedMonsterAttributes;
+ import net.minecraft.entity.ai.attributes.AttributeModifier;
++import net.minecraft.entity.item.EntityItem;
+ import net.minecraft.entity.item.EntityItemFrame;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
+@@ -41,6 +44,8 @@
  import net.minecraft.util.text.translation.I18n;
  import net.minecraft.world.World;
  
@@ -17,7 +25,44 @@
  public final class ItemStack
  {
      public static final ItemStack field_190927_a = new ItemStack((Item)null);
-@@ -169,7 +173,8 @@
+@@ -56,6 +61,8 @@
+     private boolean field_179553_i;
+     private Block field_179550_j;
+     private boolean field_179551_k;
++    private String shadowId; //AqCM
++    private EntityItem pickupEntity; //AqCM
+ 
+     public ItemStack(Block p_i1876_1_)
+     {
+@@ -101,6 +108,27 @@
+         this.field_190928_g = this.func_190926_b();
+     }
+ 
++    //AqCM - shadow item id, see carpet.helpers.ShadowItems
++    public String getShadowId()
++    {
++        return this.shadowId;
++    }
++
++    public EntityItem getPickupEntity()
++    {
++        return this.pickupEntity;
++    }
++
++    public void setPickupEntity(EntityItem entity)
++    {
++        this.pickupEntity = entity;
++    }
++
++    public void setShadowId(String id)
++    {
++        this.shadowId = id;
++    }
++
+     public ItemStack(NBTTagCompound p_i47263_1_)
+     {
+         this.field_151002_e = Item.func_111206_d(p_i47263_1_.func_74779_i("id"));
+@@ -169,7 +197,8 @@
  
          if (enumactionresult == EnumActionResult.SUCCESS)
          {
@@ -27,7 +72,13 @@
          }
  
          return enumactionresult;
-@@ -207,6 +212,8 @@
+@@ -202,11 +231,14 @@
+             p_77955_1_.func_74782_a("tag", this.field_77990_d);
+         }
+ 
++        carpet.helpers.ShadowItems.write(this, p_77955_1_); //AqCM
+         return p_77955_1_;
+     }
  
      public int func_77976_d()
      {
@@ -36,7 +87,7 @@
          return this.func_77973_b().func_77639_j();
      }
  
-@@ -334,7 +341,8 @@
+@@ -334,7 +366,8 @@
  
          if (flag)
          {
@@ -46,7 +97,7 @@
          }
      }
  
-@@ -344,7 +352,8 @@
+@@ -344,7 +377,8 @@
  
          if (flag)
          {
@@ -56,7 +107,45 @@
          }
      }
  
-@@ -496,7 +505,8 @@
+@@ -402,7 +436,7 @@
+         }
+         else
+         {
+-            return !p_77989_0_.func_190926_b() && !p_77989_1_.func_190926_b() ? p_77989_0_.func_77959_d(p_77989_1_) : false;
++            return !p_77989_0_.func_190926_b() && !p_77989_1_.func_190926_b() ? p_77989_0_.func_77959_d(p_77989_1_) && carpet.helpers.ShadowItems.sameIdOrNone(p_77989_0_, p_77989_1_) : false; //AqCM
+         }
+     }
+ 
+@@ -432,26 +466,12 @@
+ 
+     public static boolean func_179545_c(ItemStack p_179545_0_, ItemStack p_179545_1_)
+     {
+-        if (p_179545_0_ == p_179545_1_)
+-        {
+-            return true;
+-        }
+-        else
+-        {
+-            return !p_179545_0_.func_190926_b() && !p_179545_1_.func_190926_b() ? p_179545_0_.func_77969_a(p_179545_1_) : false;
+-        }
++        return carpet.helpers.ShadowItems.mergeCheck(p_179545_0_, p_179545_1_, p_179545_0_ == p_179545_1_ || (!p_179545_0_.func_190926_b() && !p_179545_1_.func_190926_b() && p_179545_0_.func_77969_a(p_179545_1_))); //AqCM
+     }
+ 
+     public static boolean func_185132_d(ItemStack p_185132_0_, ItemStack p_185132_1_)
+     {
+-        if (p_185132_0_ == p_185132_1_)
+-        {
+-            return true;
+-        }
+-        else
+-        {
+-            return !p_185132_0_.func_190926_b() && !p_185132_1_.func_190926_b() ? p_185132_0_.func_185136_b(p_185132_1_) : false;
+-        }
++        return carpet.helpers.ShadowItems.mergeCheck(p_185132_0_, p_185132_1_, p_185132_0_ == p_185132_1_ || (!p_185132_0_.func_190926_b() && !p_185132_1_.func_190926_b() && p_185132_0_.func_185136_b(p_185132_1_))); //AqCM
+     }
+ 
+     public boolean func_77969_a(ItemStack p_77969_1_)
+@@ -496,7 +516,8 @@
  
      public void func_77980_a(World p_77980_1_, EntityPlayer p_77980_2_, int p_77980_3_)
      {
@@ -66,7 +155,7 @@
          this.func_77973_b().func_77622_d(this, p_77980_1_, p_77980_2_);
      }
  
-@@ -881,4 +891,10 @@
+@@ -881,4 +902,10 @@
      {
          this.func_190917_f(-p_190918_1_);
      }

@@ -1,0 +1,30 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryHelper.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryHelper.java
+@@ -23,12 +23,14 @@
+ 
+     private static void func_180174_a(World p_180174_0_, double p_180174_1_, double p_180174_3_, double p_180174_5_, IInventory p_180174_7_)
+     {
++        java.util.Set<ItemStack> droppedShadows = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<ItemStack, Boolean>()); //AqCM
+         for (int i = 0; i < p_180174_7_.func_70302_i_(); ++i)
+         {
+             ItemStack itemstack = p_180174_7_.func_70301_a(i);
+ 
+             if (!itemstack.func_190926_b())
+             {
++                if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(itemstack) && !droppedShadows.add(itemstack)) continue; //AqCM
+                 func_180173_a(p_180174_0_, p_180174_1_, p_180174_3_, p_180174_5_, itemstack);
+             }
+         }
+@@ -40,6 +42,12 @@
+         float f1 = field_180177_a.nextFloat() * 0.8F + 0.1F;
+         float f2 = field_180177_a.nextFloat() * 0.8F + 0.1F;
+ 
++        if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(p_180173_7_)) //AqCM - spawn once, unsplit
++        {
++            p_180173_0_.func_72838_d(new EntityItem(p_180173_0_, p_180173_1_ + (double)f, p_180173_3_ + (double)f1, p_180173_5_ + (double)f2, p_180173_7_));
++            return;
++        }
++
+         while (!p_180173_7_.func_190926_b())
+         {
+             EntityItem entityitem = new EntityItem(p_180173_0_, p_180173_1_ + (double)f, p_180173_3_ + (double)f1, p_180173_5_ + (double)f2, p_180173_7_.func_77979_a(field_180177_a.nextInt(21) + 10));

@@ -29,3 +29,12 @@
          {
              ItemStack itemstack = this.func_82335_i();
  
+@@ -229,7 +235,7 @@
+ 
+         if (nbttagcompound != null && !nbttagcompound.func_82582_d())
+         {
+-            this.func_174864_a(new ItemStack(nbttagcompound), false);
++            this.func_174864_a(carpet.helpers.ShadowItems.load(nbttagcompound), false); //AqCM
+             this.func_174865_a(p_70037_1_.func_74771_c("ItemRotation"), false);
+ 
+             if (p_70037_1_.func_150297_b("ItemDropChance", 99))

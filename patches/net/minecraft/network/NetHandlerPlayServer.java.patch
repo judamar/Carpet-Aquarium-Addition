@@ -15,12 +15,13 @@
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.tileentity.CommandBlockBaseLogic;
  import net.minecraft.tileentity.TileEntity;
-@@ -121,15 +123,26 @@
+@@ -121,15 +123,27 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
 +import carpet.CarpetServer;
 +import carpet.CarpetSettings;
++import carpet.helpers.ShadowItems;
 +import carpet.helpers.TickSpeed;
 +import carpet.worldedit.WorldEditBridge;
 +import net.minecraft.world.gen.structure.template.Template;
@@ -50,7 +51,7 @@
      private long field_194404_h;
      private int field_147374_l;
      private int field_147375_m;
-@@ -257,9 +270,19 @@
+@@ -257,9 +271,19 @@
          {
              this.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.idling", new Object[0]));
          }
@@ -71,7 +72,7 @@
      {
          this.field_184349_l = this.field_147369_b.field_70165_t;
          this.field_184350_m = this.field_147369_b.field_70163_u;
-@@ -297,6 +320,11 @@
+@@ -297,6 +321,11 @@
      {
          PacketThreadUtil.func_180031_a(p_147358_1_, this, this.field_147369_b.func_71121_q());
          this.field_147369_b.func_110430_a(p_147358_1_.func_149620_c(), p_147358_1_.func_192620_b(), p_147358_1_.func_149618_e(), p_147358_1_.func_149617_f());
@@ -83,7 +84,7 @@
      }
  
      private static boolean func_183006_b(CPacketPlayer p_183006_0_)
-@@ -500,6 +528,10 @@
+@@ -500,6 +529,10 @@
                          double d10 = this.field_147369_b.field_70159_w * this.field_147369_b.field_70159_w + this.field_147369_b.field_70181_x * this.field_147369_b.field_70181_x + this.field_147369_b.field_70179_y * this.field_147369_b.field_70179_y;
                          double d11 = d7 * d7 + d8 * d8 + d9 * d9;
  
@@ -94,7 +95,7 @@
                          if (this.field_147369_b.func_70608_bn())
                          {
                              if (d11 > 1.0D)
-@@ -518,7 +550,7 @@
+@@ -518,7 +551,7 @@
                                  i = 1;
                              }
  
@@ -103,7 +104,7 @@
                              {
                                  float f2 = this.field_147369_b.func_184613_cA() ? 300.0F : 100.0F;
  
-@@ -564,7 +596,9 @@
+@@ -564,7 +597,9 @@
                              this.field_147369_b.func_70080_a(d4, d5, d6, f, f1);
                              this.field_147369_b.func_71000_j(this.field_147369_b.field_70165_t - d0, this.field_147369_b.field_70163_u - d1, this.field_147369_b.field_70161_v - d2);
  
@@ -114,7 +115,7 @@
                              {
                                  boolean flag1 = worldserver.func_184144_a(this.field_147369_b, this.field_147369_b.func_174813_aQ().func_186664_h(0.0625D)).isEmpty();
  
-@@ -627,6 +661,8 @@
+@@ -627,6 +662,8 @@
  
      public void func_147345_a(CPacketPlayerDigging p_147345_1_)
      {
@@ -123,7 +124,7 @@
          PacketThreadUtil.func_180031_a(p_147345_1_, this, this.field_147369_b.func_71121_q());
          WorldServer worldserver = this.field_147367_d.func_71218_a(this.field_147369_b.field_71093_bK);
          BlockPos blockpos = p_147345_1_.func_179715_a();
-@@ -731,7 +767,10 @@
+@@ -731,7 +768,10 @@
          {
              if (this.field_184362_y == null && this.field_147369_b.func_70092_e((double)blockpos.func_177958_n() + 0.5D, (double)blockpos.func_177956_o() + 0.5D, (double)blockpos.func_177952_p() + 0.5D) < 64.0D && !this.field_147367_d.func_175579_a(worldserver, blockpos, this.field_147369_b) && worldserver.func_175723_af().func_177746_a(blockpos))
              {
@@ -134,7 +135,7 @@
              }
          }
          else
-@@ -755,12 +794,16 @@
+@@ -755,12 +795,16 @@
  
          if (!itemstack.func_190926_b())
          {
@@ -151,7 +152,7 @@
          PacketThreadUtil.func_180031_a(p_175088_1_, this, this.field_147369_b.func_71121_q());
  
          if (this.field_147369_b.func_175149_v())
-@@ -796,13 +839,13 @@
+@@ -796,13 +840,13 @@
                      this.field_147369_b.field_71093_bK = entity.field_71093_bK;
                      this.func_147359_a(new SPacketRespawn(this.field_147369_b.field_71093_bK, worldserver1.func_175659_aa(), worldserver1.func_72912_H().func_76067_t(), this.field_147369_b.field_71134_c.func_73081_b()));
                      this.field_147367_d.func_184103_al().func_187243_f(this.field_147369_b);
@@ -167,7 +168,7 @@
                          worldserver2.func_72838_d(this.field_147369_b);
                          worldserver2.func_72866_a(this.field_147369_b, false);
                      }
-@@ -841,6 +884,11 @@
+@@ -841,6 +885,11 @@
          textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.YELLOW);
          this.field_147367_d.func_184103_al().func_148539_a(textcomponenttranslation);
          this.field_147369_b.func_71123_m();
@@ -179,7 +180,7 @@
          this.field_147367_d.func_184103_al().func_72367_e(this.field_147369_b);
  
          if (this.field_147367_d.func_71264_H() && this.field_147369_b.func_70005_c_().equals(this.field_147367_d.func_71214_G()))
-@@ -939,7 +987,7 @@
+@@ -939,7 +988,7 @@
  
              this.field_147374_l += 20;
  
@@ -188,7 +189,7 @@
              {
                  this.func_194028_b(new TextComponentTranslation("disconnect.spam", new Object[0]));
              }
-@@ -1019,13 +1067,15 @@
+@@ -1019,13 +1068,15 @@
                  break;
              case START_FALL_FLYING:
  
@@ -209,12 +210,27 @@
                      }
                  }
                  else
-@@ -1147,11 +1197,15 @@
+@@ -1147,11 +1198,29 @@
              }
              else
              {
+-                ItemStack itemstack2 = this.field_147369_b.field_71070_bA.func_184996_a(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_186993_f(), this.field_147369_b);
 +                CarpetServer.playerInventoryStacking = true;
-                 ItemStack itemstack2 = this.field_147369_b.field_71070_bA.func_184996_a(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_186993_f(), this.field_147369_b);
++                ItemStack itemstack2;
++                try
++                {
++                    itemstack2 = this.field_147369_b.field_71070_bA.func_184996_a(p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_186993_f(), this.field_147369_b);
++                }
++                catch (Throwable error) //AqCM shadow items
++                {
++                    CarpetServer.playerInventoryStacking = false;
++                    if (!ShadowItems.onSlotClickFailure(this.field_147369_b.field_71070_bA, p_147351_1_.func_149544_d(), p_147351_1_.func_149543_e(), p_147351_1_.func_186993_f(), this.field_147369_b, error))
++                    {
++                        throw error;
++                    }
++                    this.field_147369_b.func_71110_a(this.field_147369_b.field_71070_bA, this.field_147369_b.field_71070_bA.func_75138_a());
++                    return;
++                }
 +                CarpetServer.playerInventoryStacking = false;
  
                  if (ItemStack.func_77989_b(p_147351_1_.func_149546_g(), itemstack2))
@@ -225,7 +241,7 @@
                      this.field_147369_b.field_71137_h = true;
                      this.field_147369_b.field_71070_bA.func_75142_b();
                      this.field_147369_b.func_71113_k();
-@@ -1355,8 +1409,33 @@
+@@ -1355,8 +1424,33 @@
          PacketThreadUtil.func_180031_a(p_147349_1_, this, this.field_147369_b.func_71121_q());
          String s = p_147349_1_.func_149559_c();
  
@@ -260,7 +276,7 @@
              PacketBuffer packetbuffer = p_147349_1_.func_180760_b();
  
              try
-@@ -1666,13 +1745,14 @@
+@@ -1666,13 +1760,14 @@
                      String s8 = packetbuffer5.func_150789_c(32);
                      tileentitystructure.func_184405_a(TileEntityStructure.Mode.valueOf(s8));
                      tileentitystructure.func_184404_a(packetbuffer5.func_150789_c(64));
@@ -281,7 +297,7 @@
                      tileentitystructure.func_184409_c(new BlockPos(l2, i3, j));
                      String s2 = packetbuffer5.func_150789_c(32);
                      tileentitystructure.func_184411_a(Mirror.valueOf(s2));
-@@ -1709,6 +1789,17 @@
+@@ -1709,6 +1804,17 @@
                          }
                          else
                          {
@@ -299,7 +315,7 @@
                              this.field_147369_b.func_146105_b(new TextComponentTranslation("structure_block.load_prepare", new Object[] {s4}), false);
                          }
                      }
-@@ -1750,5 +1841,9 @@
+@@ -1750,5 +1856,9 @@
                  field_147370_c.error("Couldn't pick item", (Throwable)exception);
              }
          }

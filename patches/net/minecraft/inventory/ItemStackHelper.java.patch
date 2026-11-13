@@ -23,3 +23,12 @@
          NBTTagList nbttaglist = new NBTTagList();
  
          for (int i = 0; i < p_191281_1_.size(); ++i)
+@@ -59,7 +68,7 @@
+ 
+             if (j >= 0 && j < p_191283_1_.size())
+             {
+-                p_191283_1_.set(j, new ItemStack(nbttagcompound));
++                p_191283_1_.set(j, carpet.helpers.ShadowItems.load(nbttagcompound)); //AqCM
+             }
+         }
+     }

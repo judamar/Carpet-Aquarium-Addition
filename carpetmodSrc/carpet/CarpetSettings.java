@@ -1203,6 +1203,41 @@ public class CarpetSettings {
             "Mojang even added this in 16. CARPET-XCOM", category = {CREATIVE, VASTECH})
     public static boolean goddamnCarpetRule = true;
 
+    // AqCM - shadow items, ported from mattymatty97/carpet-shadow
+    @Rule(desc = "What happens to shadow items (one item stack shared by several slots) when saved and loaded again", category = {FIX, EXPERIMENTAL}, extra = {
+            "unlink: shadow items are saved as independent copies (vanilla)",
+            "persist: shadow items re-link when loaded again",
+            "vanish: shadow items disappear when loaded again"
+    })
+    public static ShadowItemMode shadowItemMode = ShadowItemMode.UNLINK;
+
+    public static enum ShadowItemMode { UNLINK, PERSIST, VANISH }
+
+    @Rule(desc = "Fixes shadow items being duplicated or lost when moved through inventories, cursor, shift-click, pickup and drops", category = {FIX, EXPERIMENTAL})
+    public static boolean shadowItemInventoryFragilityFix = false;
+
+    @Rule(desc = "Shadow items never combine with each other (requires shadowItemInventoryFragilityFix)", category = {FIX, EXPERIMENTAL})
+    public static boolean shadowItemPreventCombine = false;
+
+    @Rule(desc = "Length of the ids that identify shadow items", category = {FIX, EXPERIMENTAL}, options = {"5"}, validator = "validateShadowItemIdSize", extra = {
+            "Do not change unless you know what you are doing"
+    })
+    public static int shadowItemIdSize = 5;
+
+    @Rule(desc = "Hoppers and droppers move shadow stacks by instance, keeping them linked and consistent", category = {FIX, EXPERIMENTAL})
+    public static boolean shadowItemTransferFragilityFix = false;
+
+    @Rule(desc = "Changing a shadow item updates every inventory that holds it in the same tick", category = {FIX, EXPERIMENTAL})
+    public static boolean shadowItemUpdateFix = false;
+    private static boolean validateShadowItemIdSize(int value) {
+        try {
+            ShadowItems.setIdLength(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     @Rule(desc = "It is inconsistent that all modern carpet versions freezes block events on /tick freeze " +
             "but 1.12 carpet doesn't. Here is a fix for that. ", category = {EXPERIMENTAL, VASTECH})
     public static boolean freezeBlockEventsOnTickFreeze = true;

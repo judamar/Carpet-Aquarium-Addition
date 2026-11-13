@@ -236,7 +236,7 @@
          }
  
          NBTTagList nbttaglist = new NBTTagList();
-@@ -362,6 +531,7 @@
+@@ -362,13 +531,14 @@
          {
              NBTTagCompound nbttagcompound = p_70037_1_.func_74775_l("Offers");
              this.field_70963_i = new MerchantRecipeList(nbttagcompound);
@@ -244,6 +244,14 @@
          }
  
          NBTTagList nbttaglist = p_70037_1_.func_150295_c("Inventory", 10);
+ 
+         for (int i = 0; i < nbttaglist.func_74745_c(); ++i)
+         {
+-            ItemStack itemstack = new ItemStack(nbttaglist.func_150305_b(i));
++            ItemStack itemstack = carpet.helpers.ShadowItems.load(nbttaglist.func_150305_b(i)); //AqCM
+ 
+             if (!itemstack.func_190926_b())
+             {
 @@ -491,12 +661,17 @@
              }
          }

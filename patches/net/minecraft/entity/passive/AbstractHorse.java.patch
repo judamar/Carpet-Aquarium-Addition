@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/passive/AbstractHorse.java
++++ ../src-work/minecraft/net/minecraft/entity/passive/AbstractHorse.java
+@@ -978,7 +978,7 @@
+ 
+         if (p_70037_1_.func_150297_b("SaddleItem", 10))
+         {
+-            ItemStack itemstack = new ItemStack(p_70037_1_.func_74775_l("SaddleItem"));
++            ItemStack itemstack = carpet.helpers.ShadowItems.load(p_70037_1_.func_74775_l("SaddleItem")); //AqCM
+ 
+             if (itemstack.func_77973_b() == Items.field_151141_av)
+             {
