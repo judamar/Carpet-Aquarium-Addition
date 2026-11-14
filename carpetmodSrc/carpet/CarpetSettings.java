@@ -1322,6 +1322,10 @@ public class CarpetSettings {
     @Rule(desc = "Enable bundled LMS implementation", category = {FEATURE, VASTECH})
     public static boolean modLitematicaServerPaster = false;
 
+    @Rule(desc = "Server side of Litematica's 'save schematic on server' (litematica:save). " +
+            "Sends block entity NBT (chest contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
+    public static boolean modLitematicaServerSave = false;
+
     // ===== Bullet ===== //
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
     public static boolean scoreboardStats;
