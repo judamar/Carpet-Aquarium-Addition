@@ -1383,10 +1383,10 @@ public class CarpetSettings {
     @Rule(desc = "Player with OP can place CommandBlocks or StructureBlocks in survival.", category = {EXPERIMENTAL, SURVIVAL, AQUARIUM})
     public static boolean playerCanPlaceCommandBlocks = false;
 
-    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature that item entity of skulker box drops all of its contents when the item entity is damaged to die, This feature is introduced to vanilla Minecraft in mc1.17", category = {AQUARIUM, FEATURE, STORAGE})
     public static boolean shulkerBoxContentDropBackport = false;
 
-    @Rule(desc = "Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE})
+    @Rule(desc = "Backport the feature from Minecraft 1.19+ that minecart entity drops the full cart item on destroy", category = {AQUARIUM, FEATURE, STORAGE})
     public static boolean minecartFullDropBackport = false;
 
     @Rule(desc = "Endstone is instaminable with efficiency 5 and haste 2", category = {AQUARIUM, FEATURE, EXPERIMENTAL})
@@ -1404,7 +1404,7 @@ public class CarpetSettings {
     @Rule(desc = "Enables /center command to calculate the center of a perimeter by taking 2 corners (X1,Z1 X2,Z2).", category = {AQUARIUM, COMMANDS})
     public static boolean commandCenter = false;
 
-    @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE})
+    @Rule(desc = "Allow creative players to open a container even if the container is blocked. e.g. for shulker box", category = {AQUARIUM, CREATIVE, STORAGE})
     public static boolean creativeOpenContainerForcibly = false;
 
     @Rule(desc = "Enables /delimit command to calculate the limits of a perimeter by taking the center coordinate and radius (X, Z, radius).", category = {AQUARIUM, COMMANDS})
@@ -1422,8 +1422,20 @@ public class CarpetSettings {
     @Rule(desc = "Enables /itemrandomizer to manage and apply item tables (collections of ItemStacks) into containers, blocks, or inventories using various strategies.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandItemRandomizer = false;
 
+    @Rule(desc = "Enables /period, A tool to measure how often a redstone component is activated.", category = {AQUARIUM, CREATIVE, COMMANDS})
+    public static boolean commandPeriod = false;
+
     @Rule(desc = "Prevents void damage for players", category = {AQUARIUM, EXPERIMENTAL, SURVIVAL})
     public static boolean voidDamageIgnorePlayer = false;
+
+    @Rule(desc = "Clears AI task references when an entity is removed, preventing memory leaks", category = {FIX, AQUARIUM, OPTIMIZATIONS})
+    public static boolean entityBrainMemoryUnfreedFix = false;
+
+    @Rule(desc = "Entities are removed immediately upon death instead of waiting 20 ticks", category = {AQUARIUM, OPTIMIZATIONS})
+    public static boolean entityInstantDeathRemoval = false;
+
+    //@Rule(desc = "Allow horizontally moving Ender Pearls to load chunks as entity ticking", category = {AQUARIUM, EXPERIMENTAL})
+    //public static boolean enderPearlChunkLoading = false;
 
     // ===== API ===== //
 
