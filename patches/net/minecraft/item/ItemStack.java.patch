@@ -107,15 +107,6 @@
          }
      }
  
-@@ -402,7 +436,7 @@
-         }
-         else
-         {
--            return !p_77989_0_.func_190926_b() && !p_77989_1_.func_190926_b() ? p_77989_0_.func_77959_d(p_77989_1_) : false;
-+            return !p_77989_0_.func_190926_b() && !p_77989_1_.func_190926_b() ? p_77989_0_.func_77959_d(p_77989_1_) && carpet.helpers.ShadowItems.sameIdOrNone(p_77989_0_, p_77989_1_) : false; //AqCM
-         }
-     }
- 
 @@ -432,26 +466,12 @@
  
      public static boolean func_179545_c(ItemStack p_179545_0_, ItemStack p_179545_1_)

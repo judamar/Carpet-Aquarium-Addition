@@ -151,13 +151,6 @@ public class ShadowItems {
         return a.getShadowId() != null && a.getShadowId().equals(b.getShadowId());
     }
 
-    /** areItemStacksEqual must also tell shadow stacks with different ids apart. */
-    public static boolean sameIdOrNone(ItemStack a, ItemStack b) {
-        if (!CarpetSettings.shadowItemInventoryFragilityFix) return true;
-        String x = a.getShadowId(), y = b.getShadowId();
-        return x == null ? y == null : x.equals(y);
-    }
-
     /** Vetoes a merge while inside slotClick/combineItems/pickup when both stacks share an id (or both are shadow with PreventCombine). */
     public static boolean mergeCheck(ItemStack a, ItemStack b, boolean original) {
         if (!original || mergeDepth <= 0 || !CarpetSettings.shadowItemInventoryFragilityFix) return original;
