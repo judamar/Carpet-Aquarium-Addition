@@ -125,7 +125,7 @@
  
                  if (slot6 != null)
                  {
-@@ -259,7 +274,7 @@
+@@ -259,17 +274,25 @@
                      {
                          if (!itemstack11.func_190926_b() && slot6.func_75214_a(itemstack11))
                          {
@@ -134,8 +134,19 @@
  
                              if (i3 > slot6.func_178170_b(itemstack11))
                              {
-@@ -269,7 +284,7 @@
-                             slot6.func_75215_d(itemstack11.func_77979_a(i3));
+                                 i3 = slot6.func_178170_b(itemstack11);
+                             }
+ 
+-                            slot6.func_75215_d(itemstack11.func_77979_a(i3));
++                            if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(itemstack11) && i3 >= itemstack11.func_190916_E()) //AqCM - whole shadow stack moves keep the instance
++                            {
++                                slot6.func_75215_d(itemstack11);
++                                inventoryplayer.func_70437_b(ItemStack.field_190927_a);
++                            }
++                            else
++                            {
++                                slot6.func_75215_d(itemstack11.func_77979_a(i3));
++                            }
                          }
                      }
 -                    else if (slot6.func_82869_a(p_184996_4_))
@@ -143,7 +154,7 @@
                      {
                          if (itemstack11.func_190926_b())
                          {
-@@ -280,22 +295,27 @@
+@@ -280,22 +303,27 @@
                              }
                              else
                              {
@@ -176,7 +187,7 @@
  
                                  if (k2 > slot6.func_178170_b(itemstack11) - itemstack8.func_190916_E())
                                  {
-@@ -330,7 +350,7 @@
+@@ -330,7 +358,7 @@
                                      slot6.func_75215_d(ItemStack.field_190927_a);
                                  }
  
@@ -185,7 +196,7 @@
                              }
                          }
                      }
-@@ -339,22 +359,22 @@
+@@ -339,22 +367,22 @@
                  }
              }
          }
@@ -214,7 +225,7 @@
                      }
                  }
                  else if (itemstack10.func_190926_b())
-@@ -370,36 +390,36 @@
+@@ -370,36 +398,36 @@
                          else
                          {
                              slot4.func_75215_d(itemstack6);
@@ -259,7 +270,7 @@
  
              if (slot3 != null && slot3.func_75216_d())
              {
-@@ -408,26 +428,40 @@
+@@ -408,26 +436,40 @@
                  inventoryplayer.func_70437_b(itemstack5);
              }
          }
@@ -311,7 +322,7 @@
  
                  for (int k = 0; k < 2; ++k)
                  {
-@@ -435,7 +469,7 @@
+@@ -435,7 +477,7 @@
                      {
                          Slot slot1 = this.field_75151_b.get(l);
  
@@ -320,7 +331,7 @@
                          {
                              ItemStack itemstack2 = slot1.func_75211_c();
  
-@@ -450,7 +484,7 @@
+@@ -450,7 +492,7 @@
                                      slot1.func_75215_d(ItemStack.field_190927_a);
                                  }
  
@@ -329,7 +340,7 @@
                              }
                          }
                      }
-@@ -555,7 +589,7 @@
+@@ -555,7 +597,7 @@
                  Slot slot = this.field_75151_b.get(i);
                  ItemStack itemstack = slot.func_75211_c();
  
@@ -338,7 +349,7 @@
                  {
                      int j = itemstack.func_190916_E() + p_75135_1_.func_190916_E();
  
-@@ -616,6 +650,15 @@
+@@ -616,6 +658,15 @@
  
                  if (itemstack1.func_190926_b() && slot1.func_75214_a(p_75135_1_))
                  {
@@ -354,7 +365,7 @@
                      if (p_75135_1_.func_190916_E() > slot1.func_75219_a())
                      {
                          slot1.func_75215_d(p_75135_1_.func_77979_a(slot1.func_75219_a()));
-@@ -680,6 +723,8 @@
+@@ -680,6 +731,8 @@
      {
          boolean flag = p_94527_0_ == null || !p_94527_0_.func_75216_d();
  
@@ -363,7 +374,7 @@
          if (!flag && p_94527_1_.func_77969_a(p_94527_0_.func_75211_c()) && ItemStack.func_77970_a(p_94527_0_.func_75211_c(), p_94527_1_))
          {
              return p_94527_0_.func_75211_c().func_190916_E() + (p_94527_2_ ? 0 : p_94527_1_.func_190916_E()) <= p_94527_1_.func_77976_d();
-@@ -762,4 +807,10 @@
+@@ -762,4 +815,10 @@
              entityplayermp.field_71135_a.func_147359_a(new SPacketSetSlot(this.field_75152_c, 0, itemstack));
          }
      }
