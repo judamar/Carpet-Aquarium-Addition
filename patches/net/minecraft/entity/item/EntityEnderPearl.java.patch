@@ -17,3 +17,11 @@
                  {
                      if (this.field_70146_Z.nextFloat() < 0.05F && this.field_70170_p.func_82736_K().func_82766_b("doMobSpawning"))
                      {
+@@ -129,6 +130,7 @@
+         else
+         {
+             super.func_70071_h_();
++            carpet.helpers.EnderPearlChunkLoading.tick(this); //AqCM
+         }
+     }
+ 

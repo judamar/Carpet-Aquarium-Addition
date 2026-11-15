@@ -1434,8 +1434,8 @@ public class CarpetSettings {
     @Rule(desc = "Entities are removed immediately upon death instead of waiting 20 ticks", category = {AQUARIUM, OPTIMIZATIONS})
     public static boolean entityInstantDeathRemoval = false;
 
-    //@Rule(desc = "Allow horizontally moving Ender Pearls to load chunks as entity ticking", category = {AQUARIUM, EXPERIMENTAL})
-    //public static boolean enderPearlChunkLoading = false;
+    @Rule(desc = "Horizontally moving ender pearls load the 5x5 chunks around them, so they keep flying outside player range", category = {AQUARIUM, EXPERIMENTAL})
+    public static boolean enderPearlChunkLoading = false;
 
     // ===== API ===== //
 
