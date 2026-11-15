@@ -1,6 +1,7 @@
 package carpet;
 
 import carpet.helpers.StackTraceDeobfuscator;
+import carpet.network.LitematicaSaveHandler;
 import carpet.network.PluginChannelHandler;
 import carpet.network.PluginChannelManager;
 import carpet.network.ToggleableChannelHandler;
@@ -81,6 +82,7 @@ public class CarpetServer // static for now - easier to handle all around the co
             }
         };
         pluginChannels.register(lmsChannel);
+        pluginChannels.register(new LitematicaSaveHandler()); //AqCM
     }
     public static void onServerLoaded(MinecraftServer server)
     {
