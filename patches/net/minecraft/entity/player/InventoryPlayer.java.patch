@@ -8,7 +8,35 @@
          }
  
          return i == -1 ? p_70452_1_.func_190916_E() : this.func_191973_d(i, p_70452_1_);
-@@ -311,6 +312,7 @@
+@@ -296,12 +297,27 @@
+         return this.func_191971_c(-1, p_70441_1_);
+     }
+ 
++    //AqCM - a shadow stack goes whole into an empty slot, its source item entity is removed
++    private boolean addShadowWhole(int slot, ItemStack stack)
++    {
++        if (slot == -1) slot = this.func_70447_i();
++        if (slot < 0 || slot >= this.field_70462_a.size() || !this.field_70462_a.get(slot).func_190926_b()) return false;
++        this.field_70462_a.set(slot, stack);
++        stack.func_190915_d(5);
++        if (stack.getPickupEntity() != null) stack.getPickupEntity().func_70106_y();
++        return true;
++    }
++
+     public boolean func_191971_c(int p_191971_1_, final ItemStack p_191971_2_)
+     {
+         if (p_191971_2_.func_190926_b())
+         {
+             return false;
+         }
++        else if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(p_191971_2_) && this.addShadowWhole(p_191971_1_, p_191971_2_)) //AqCM
++        {
++            return true;
++        }
+         else
+         {
+             try
+@@ -311,6 +327,7 @@
                      if (p_191971_1_ == -1)
                      {
                          p_191971_1_ = this.func_70447_i();
@@ -16,3 +44,12 @@
                      }
  
                      if (p_191971_1_ >= 0)
+@@ -552,7 +569,7 @@
+         {
+             NBTTagCompound nbttagcompound = p_70443_1_.func_150305_b(i);
+             int j = nbttagcompound.func_74771_c("Slot") & 255;
+-            ItemStack itemstack = new ItemStack(nbttagcompound);
++            ItemStack itemstack = carpet.helpers.ShadowItems.load(nbttagcompound); //AqCM
+ 
+             if (!itemstack.func_190926_b())
+             {

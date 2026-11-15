@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockJukebox.java
++++ ../src-work/minecraft/net/minecraft/block/BlockJukebox.java
+@@ -166,7 +166,7 @@
+ 
+                 if (p_145839_1_.func_150297_b("RecordItem", 10))
+                 {
+-                    this.func_145857_a(new ItemStack(p_145839_1_.func_74775_l("RecordItem")));
++                    this.func_145857_a(carpet.helpers.ShadowItems.load(p_145839_1_.func_74775_l("RecordItem"))); //AqCM
+                 }
+                 else if (p_145839_1_.func_74762_e("Record") > 0)
+                 {

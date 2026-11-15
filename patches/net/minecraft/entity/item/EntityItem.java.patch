@@ -80,7 +80,33 @@
                  this.func_70106_y();
              }
          }
-@@ -221,8 +251,23 @@
+@@ -176,7 +206,15 @@
+     {
+         for (EntityItem entityitem : this.field_70170_p.func_72872_a(EntityItem.class, this.func_174813_aQ().func_72314_b(0.5D, 0.0D, 0.5D)))
+         {
+-            this.func_70289_a(entityitem);
++            carpet.helpers.ShadowItems.mergeStart(); //AqCM
++            try
++            {
++                this.func_70289_a(entityitem);
++            }
++            finally
++            {
++                carpet.helpers.ShadowItems.mergeEnd();
++            }
+         }
+     }
+ 
+@@ -195,7 +233,7 @@
+             {
+                 if (this.field_70292_b != -32768 && p_70289_1_.field_70292_b != -32768)
+                 {
+-                    if (itemstack1.func_77973_b() != itemstack.func_77973_b())
++                    if (itemstack1.func_77973_b() != itemstack.func_77973_b() || !carpet.helpers.ShadowItems.mergeCheck(itemstack, itemstack1, true)) //AqCM
+                     {
+                         return false;
+                     }
+@@ -221,8 +259,23 @@
                      }
                      else if (itemstack1.func_190916_E() + itemstack.func_190916_E() > itemstack1.func_77976_d())
                      {
@@ -104,7 +130,7 @@
                      else
                      {
                          itemstack1.func_190917_f(itemstack.func_190916_E());
-@@ -256,6 +301,8 @@
+@@ -256,6 +309,8 @@
  
      public boolean func_70072_I()
      {
@@ -113,7 +139,7 @@
          if (this.field_70170_p.func_72918_a(this.func_174813_aQ(), Material.field_151586_h, this))
          {
              if (!this.field_70171_ac && !this.field_70148_d)
-@@ -269,7 +316,8 @@
+@@ -269,7 +324,8 @@
          {
              this.field_70171_ac = false;
          }
@@ -123,7 +149,7 @@
          return this.field_70171_ac;
      }
  
-@@ -295,6 +343,19 @@
+@@ -295,6 +351,19 @@
  
              if (this.field_70291_e <= 0)
              {
@@ -143,18 +169,42 @@
                  this.func_70106_y();
              }
  
-@@ -366,6 +427,10 @@
+@@ -350,7 +419,7 @@
+         }
+ 
+         NBTTagCompound nbttagcompound = p_70037_1_.func_74775_l("Item");
+-        this.func_92058_a(new ItemStack(nbttagcompound));
++        this.func_92058_a(carpet.helpers.ShadowItems.load(nbttagcompound)); //AqCM
+ 
+         if (this.func_92059_d().func_190926_b())
+         {
+@@ -366,8 +435,24 @@
              Item item = itemstack.func_77973_b();
              int i = itemstack.func_190916_E();
  
+-            if (this.field_145804_b == 0 && (this.field_145802_g == null || 6000 - this.field_70292_b <= 200 || this.field_145802_g.equals(p_70100_1_.func_70005_c_())) && p_70100_1_.field_71071_by.func_70441_a(itemstack))
 +            if(CarpetSettings.craftingWindowDuplication && p_70100_1_ instanceof EntityPlayerMP){
 +                ((EntityPlayerMP)p_70100_1_).dupeItemScan(true);
 +            }
 +            CarpetServer.playerInventoryStacking = true;
-             if (this.field_145804_b == 0 && (this.field_145802_g == null || 6000 - this.field_70292_b <= 200 || this.field_145802_g.equals(p_70100_1_.func_70005_c_())) && p_70100_1_.field_71071_by.func_70441_a(itemstack))
++            itemstack.setPickupEntity(this); //AqCM
++            carpet.helpers.ShadowItems.mergeStart();
++            boolean added;
++            try
              {
++                added = this.field_145804_b == 0 && (this.field_145802_g == null || 6000 - this.field_70292_b <= 200 || this.field_145802_g.equals(p_70100_1_.func_70005_c_())) && p_70100_1_.field_71071_by.func_70441_a(itemstack);
++            }
++            finally
++            {
++                carpet.helpers.ShadowItems.mergeEnd();
++                itemstack.setPickupEntity(null);
++            }
++            if (added)
++            {
                  p_70100_1_.func_71001_a(this, i);
-@@ -376,8 +441,13 @@
+ 
+                 if (itemstack.func_190926_b())
+@@ -376,8 +461,13 @@
                      itemstack.func_190920_e(i);
                  }
  
@@ -169,7 +219,7 @@
          }
      }
  
-@@ -470,4 +540,9 @@
+@@ -470,4 +560,9 @@
          this.func_174871_r();
          this.field_70292_b = 5999;
      }

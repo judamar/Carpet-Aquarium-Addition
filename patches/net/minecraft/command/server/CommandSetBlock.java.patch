@@ -53,7 +53,12 @@
                  {
                      throw new CommandException("commands.setblock.noChange", new Object[0]);
                  }
-@@ -129,7 +146,12 @@
+@@ -125,11 +142,16 @@
+                             nbttagcompound.func_74768_a("x", blockpos.func_177958_n());
+                             nbttagcompound.func_74768_a("y", blockpos.func_177956_o());
+                             nbttagcompound.func_74768_a("z", blockpos.func_177952_p());
+-                            tileentity.func_145839_a(nbttagcompound);
++                            carpet.helpers.ShadowItems.readTileEntity(tileentity, nbttagcompound); //AqCM
                          }
                      }
  

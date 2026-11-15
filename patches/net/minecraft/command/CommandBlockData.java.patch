@@ -10,13 +10,15 @@
  public class CommandBlockData extends CommandBase
  {
      public String func_71517_b()
-@@ -80,6 +83,9 @@
+@@ -80,7 +83,10 @@
                      }
                      else
                      {
+-                        tileentity.func_145839_a(nbttagcompound);
 +                        EntityPlayerMP worldEditPlayer = p_184881_2_ instanceof EntityPlayerMP ? (EntityPlayerMP) p_184881_2_ : null;
 +                        WorldEditBridge.recordBlockEdit(worldEditPlayer, world, blockpos, iblockstate, nbttagcompound2);
 +                        
-                         tileentity.func_145839_a(nbttagcompound);
++                        carpet.helpers.ShadowItems.readTileEntity(tileentity, nbttagcompound); //AqCM
                          tileentity.func_70296_d();
                          world.func_184138_a(blockpos, iblockstate, iblockstate, 3);
+                         p_184881_2_.func_174794_a(CommandResultStats.Type.AFFECTED_BLOCKS, 1);

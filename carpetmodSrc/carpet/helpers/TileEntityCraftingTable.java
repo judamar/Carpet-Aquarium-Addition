@@ -84,7 +84,7 @@ public class TileEntityCraftingTable extends TileEntityLockable implements ISide
     {
         super.readFromNBT(tag);
         ItemStackHelper.loadAllItems(tag, inventory.stackList);
-        this.output = new ItemStack(tag.getCompoundTag("Output"));
+        this.output = carpet.helpers.ShadowItems.load(tag.getCompoundTag("Output"));
     }
 
     @Override

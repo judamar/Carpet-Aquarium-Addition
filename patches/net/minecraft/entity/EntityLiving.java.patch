@@ -65,6 +65,24 @@
  
          p_70014_1_.func_74757_a("LeftHanded", this.func_184638_cS());
  
+@@ -444,7 +461,7 @@
+ 
+             for (int i = 0; i < this.field_184657_bw.size(); ++i)
+             {
+-                this.field_184657_bw.set(i, new ItemStack(nbttaglist.func_150305_b(i)));
++                this.field_184657_bw.set(i, carpet.helpers.ShadowItems.load(nbttaglist.func_150305_b(i))); //AqCM
+             }
+         }
+ 
+@@ -454,7 +471,7 @@
+ 
+             for (int j = 0; j < this.field_184656_bv.size(); ++j)
+             {
+-                this.field_184656_bv.set(j, new ItemStack(nbttaglist1.func_150305_b(j)));
++                this.field_184656_bv.set(j, carpet.helpers.ShadowItems.load(nbttaglist1.func_150305_b(j))); //AqCM
+             }
+         }
+ 
 @@ -821,7 +838,9 @@
  
      public boolean func_70058_J()

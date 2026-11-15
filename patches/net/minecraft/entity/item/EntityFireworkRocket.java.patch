@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/item/EntityFireworkRocket.java
++++ ../src-work/minecraft/net/minecraft/entity/item/EntityFireworkRocket.java
+@@ -241,7 +241,7 @@
+ 
+         if (nbttagcompound != null)
+         {
+-            ItemStack itemstack = new ItemStack(nbttagcompound);
++            ItemStack itemstack = carpet.helpers.ShadowItems.load(nbttagcompound); //AqCM
+ 
+             if (!itemstack.func_190926_b())
+             {

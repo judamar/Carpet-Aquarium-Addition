@@ -9,28 +9,279 @@
  public abstract class Container
  {
      public NonNullList<ItemStack> field_75153_a = NonNullList.<ItemStack>func_191196_a();
-@@ -281,7 +283,8 @@
+@@ -116,13 +118,26 @@
+ 
+     public ItemStack func_184996_a(int p_184996_1_, int p_184996_2_, ClickType p_184996_3_, EntityPlayer p_184996_4_)
+     {
++        carpet.helpers.ShadowItems.mergeStart(); //AqCM
++        try
++        {
++            return this.slotClick0(p_184996_1_, p_184996_2_, p_184996_3_, p_184996_4_);
++        }
++        finally
++        {
++            carpet.helpers.ShadowItems.mergeEnd();
++        }
++    }
++
++    private ItemStack slotClick0(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player)
++    {
+         ItemStack itemstack = ItemStack.field_190927_a;
+-        InventoryPlayer inventoryplayer = p_184996_4_.field_71071_by;
++        InventoryPlayer inventoryplayer = player.field_71071_by;
+ 
+-        if (p_184996_3_ == ClickType.QUICK_CRAFT)
++        if (clickTypeIn == ClickType.QUICK_CRAFT)
+         {
+             int j1 = this.field_94536_g;
+-            this.field_94536_g = func_94532_c(p_184996_2_);
++            this.field_94536_g = func_94532_c(dragType);
+ 
+             if ((j1 != 1 || this.field_94536_g != 2) && j1 != this.field_94536_g)
+             {
+@@ -134,9 +149,9 @@
+             }
+             else if (this.field_94536_g == 0)
+             {
+-                this.field_94535_f = func_94529_b(p_184996_2_);
++                this.field_94535_f = func_94529_b(dragType);
+ 
+-                if (func_180610_a(this.field_94535_f, p_184996_4_))
++                if (func_180610_a(this.field_94535_f, player))
+                 {
+                     this.field_94536_g = 1;
+                     this.field_94537_h.clear();
+@@ -148,7 +163,7 @@
+             }
+             else if (this.field_94536_g == 1)
+             {
+-                Slot slot7 = this.field_75151_b.get(p_184996_1_);
++                Slot slot7 = this.field_75151_b.get(slotId);
+                 ItemStack itemstack12 = inventoryplayer.func_70445_o();
+ 
+                 if (slot7 != null && func_94527_a(slot7, itemstack12, true) && slot7.func_75214_a(itemstack12) && (this.field_94535_f == 2 || itemstack12.func_190916_E() > this.field_94537_h.size()) && this.func_94531_b(slot7))
+@@ -199,51 +214,51 @@
+         {
+             this.func_94533_d();
+         }
+-        else if ((p_184996_3_ == ClickType.PICKUP || p_184996_3_ == ClickType.QUICK_MOVE) && (p_184996_2_ == 0 || p_184996_2_ == 1))
++        else if ((clickTypeIn == ClickType.PICKUP || clickTypeIn == ClickType.QUICK_MOVE) && (dragType == 0 || dragType == 1))
+         {
+-            if (p_184996_1_ == -999)
++            if (slotId == -999)
+             {
+                 if (!inventoryplayer.func_70445_o().func_190926_b())
+                 {
+-                    if (p_184996_2_ == 0)
++                    if (dragType == 0)
+                     {
+-                        p_184996_4_.func_71019_a(inventoryplayer.func_70445_o(), true);
++                        player.func_71019_a(inventoryplayer.func_70445_o(), true);
+                         inventoryplayer.func_70437_b(ItemStack.field_190927_a);
+                     }
+ 
+-                    if (p_184996_2_ == 1)
++                    if (dragType == 1)
+                     {
+-                        p_184996_4_.func_71019_a(inventoryplayer.func_70445_o().func_77979_a(1), true);
++                        player.func_71019_a(inventoryplayer.func_70445_o().func_77979_a(1), true);
+                     }
+                 }
+             }
+-            else if (p_184996_3_ == ClickType.QUICK_MOVE)
++            else if (clickTypeIn == ClickType.QUICK_MOVE)
+             {
+-                if (p_184996_1_ < 0)
++                if (slotId < 0)
+                 {
+                     return ItemStack.field_190927_a;
+                 }
+ 
+-                Slot slot5 = this.field_75151_b.get(p_184996_1_);
++                Slot slot5 = this.field_75151_b.get(slotId);
+ 
+-                if (slot5 == null || !slot5.func_82869_a(p_184996_4_))
++                if (slot5 == null || !slot5.func_82869_a(player))
+                 {
+                     return ItemStack.field_190927_a;
+                 }
+ 
+-                for (ItemStack itemstack7 = this.func_82846_b(p_184996_4_, p_184996_1_); !itemstack7.func_190926_b() && ItemStack.func_179545_c(slot5.func_75211_c(), itemstack7); itemstack7 = this.func_82846_b(p_184996_4_, p_184996_1_))
++                for (ItemStack itemstack7 = carpet.helpers.ShadowItems.afterTransfer(slot5, this.func_82846_b(player, slotId)); !itemstack7.func_190926_b() && ItemStack.func_179545_c(slot5.func_75211_c(), itemstack7); itemstack7 = carpet.helpers.ShadowItems.afterTransfer(slot5, this.func_82846_b(player, slotId))) //AqCM
+                 {
+                     itemstack = itemstack7.func_77946_l();
+                 }
+             }
+             else
+             {
+-                if (p_184996_1_ < 0)
++                if (slotId < 0)
+                 {
+                     return ItemStack.field_190927_a;
+                 }
+ 
+-                Slot slot6 = this.field_75151_b.get(p_184996_1_);
++                Slot slot6 = this.field_75151_b.get(slotId);
+ 
+                 if (slot6 != null)
+                 {
+@@ -259,17 +274,25 @@
+                     {
+                         if (!itemstack11.func_190926_b() && slot6.func_75214_a(itemstack11))
+                         {
+-                            int i3 = p_184996_2_ == 0 ? itemstack11.func_190916_E() : 1;
++                            int i3 = dragType == 0 ? itemstack11.func_190916_E() : 1;
+ 
+                             if (i3 > slot6.func_178170_b(itemstack11))
+                             {
+                                 i3 = slot6.func_178170_b(itemstack11);
+                             }
+ 
+-                            slot6.func_75215_d(itemstack11.func_77979_a(i3));
++                            if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(itemstack11) && i3 >= itemstack11.func_190916_E()) //AqCM - whole shadow stack moves keep the instance
++                            {
++                                slot6.func_75215_d(itemstack11);
++                                inventoryplayer.func_70437_b(ItemStack.field_190927_a);
++                            }
++                            else
++                            {
++                                slot6.func_75215_d(itemstack11.func_77979_a(i3));
++                            }
+                         }
+                     }
+-                    else if (slot6.func_82869_a(p_184996_4_))
++                    else if (slot6.func_82869_a(player))
+                     {
+                         if (itemstack11.func_190926_b())
+                         {
+@@ -280,22 +303,27 @@
+                             }
                              else
                              {
-                                 int l2 = p_184996_2_ == 0 ? itemstack8.func_190916_E() : (itemstack8.func_190916_E() + 1) / 2;
+-                                int l2 = p_184996_2_ == 0 ? itemstack8.func_190916_E() : (itemstack8.func_190916_E() + 1) / 2;
 -                                inventoryplayer.func_70437_b(slot6.func_75209_a(l2));
++                                int l2 = dragType == 0 ? itemstack8.func_190916_E() : (itemstack8.func_190916_E() + 1) / 2;
 +                                // Changed method for auto crafting CARPET-XCOM
-+                                inventoryplayer.func_70437_b(decrStackSize(p_184996_4_, p_184996_1_, l2));
++                                inventoryplayer.func_70437_b(decrStackSize(player, slotId, l2));
  
                                  if (itemstack8.func_190926_b())
                                  {
-@@ -293,7 +296,7 @@
+                                     slot6.func_75215_d(ItemStack.field_190927_a);
+                                 }
+ 
+-                                slot6.func_190901_a(p_184996_4_, inventoryplayer.func_70445_o());
++                                slot6.func_190901_a(player, inventoryplayer.func_70445_o());
+                             }
                          }
                          else if (slot6.func_75214_a(itemstack11))
                          {
 -                            if (itemstack8.func_77973_b() == itemstack11.func_77973_b() && itemstack8.func_77960_j() == itemstack11.func_77960_j() && ItemStack.func_77970_a(itemstack8, itemstack11))
-+                            if (itemstack8.func_77973_b() == itemstack11.func_77973_b() && itemstack8.func_77960_j() == itemstack11.func_77960_j() && ItemStack.func_77970_a(itemstack8, itemstack11) && itemstack11.func_77985_e()) // Check If item can stack, Always true in vanilla CARPET-XCOM
++                            if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.sameShadowId(itemstack8, itemstack11)) //AqCM - same shadow stack, nothing to merge
                              {
-                                 int k2 = p_184996_2_ == 0 ? itemstack11.func_190916_E() : 1;
+-                                int k2 = p_184996_2_ == 0 ? itemstack11.func_190916_E() : 1;
++                                inventoryplayer.func_70437_b(ItemStack.field_190927_a);
++                            }
++                            else if (itemstack8.func_77973_b() == itemstack11.func_77973_b() && itemstack8.func_77960_j() == itemstack11.func_77960_j() && ItemStack.func_77970_a(itemstack8, itemstack11) && itemstack11.func_77985_e()) // Check If item can stack, Always true in vanilla CARPET-XCOM
++                            {
++                                int k2 = dragType == 0 ? itemstack11.func_190916_E() : 1;
  
-@@ -414,9 +417,23 @@
+                                 if (k2 > slot6.func_178170_b(itemstack11) - itemstack8.func_190916_E())
+                                 {
+@@ -330,7 +358,7 @@
+                                     slot6.func_75215_d(ItemStack.field_190927_a);
+                                 }
  
-             if (slot2 != null && slot2.func_75216_d() && slot2.func_82869_a(p_184996_4_))
+-                                slot6.func_190901_a(p_184996_4_, inventoryplayer.func_70445_o());
++                                slot6.func_190901_a(player, inventoryplayer.func_70445_o());
+                             }
+                         }
+                     }
+@@ -339,22 +367,22 @@
+                 }
+             }
+         }
+-        else if (p_184996_3_ == ClickType.SWAP && p_184996_2_ >= 0 && p_184996_2_ < 9)
++        else if (clickTypeIn == ClickType.SWAP && dragType >= 0 && dragType < 9)
+         {
+-            Slot slot4 = this.field_75151_b.get(p_184996_1_);
+-            ItemStack itemstack6 = inventoryplayer.func_70301_a(p_184996_2_);
++            Slot slot4 = this.field_75151_b.get(slotId);
++            ItemStack itemstack6 = inventoryplayer.func_70301_a(dragType);
+             ItemStack itemstack10 = slot4.func_75211_c();
+ 
+             if (!itemstack6.func_190926_b() || !itemstack10.func_190926_b())
+             {
+                 if (itemstack6.func_190926_b())
+                 {
+-                    if (slot4.func_82869_a(p_184996_4_))
++                    if (slot4.func_82869_a(player))
+                     {
+-                        inventoryplayer.func_70299_a(p_184996_2_, itemstack10);
++                        inventoryplayer.func_70299_a(dragType, itemstack10);
+                         slot4.func_190900_b(itemstack10.func_190916_E());
+                         slot4.func_75215_d(ItemStack.field_190927_a);
+-                        slot4.func_190901_a(p_184996_4_, itemstack10);
++                        slot4.func_190901_a(player, itemstack10);
+                     }
+                 }
+                 else if (itemstack10.func_190926_b())
+@@ -370,36 +398,36 @@
+                         else
+                         {
+                             slot4.func_75215_d(itemstack6);
+-                            inventoryplayer.func_70299_a(p_184996_2_, ItemStack.field_190927_a);
++                            inventoryplayer.func_70299_a(dragType, ItemStack.field_190927_a);
+                         }
+                     }
+                 }
+-                else if (slot4.func_82869_a(p_184996_4_) && slot4.func_75214_a(itemstack6))
++                else if (slot4.func_82869_a(player) && slot4.func_75214_a(itemstack6))
+                 {
+                     int i2 = slot4.func_178170_b(itemstack6);
+ 
+                     if (itemstack6.func_190916_E() > i2)
+                     {
+                         slot4.func_75215_d(itemstack6.func_77979_a(i2));
+-                        slot4.func_190901_a(p_184996_4_, itemstack10);
++                        slot4.func_190901_a(player, itemstack10);
+ 
+                         if (!inventoryplayer.func_70441_a(itemstack10))
+                         {
+-                            p_184996_4_.func_71019_a(itemstack10, true);
++                            player.func_71019_a(itemstack10, true);
+                         }
+                     }
+                     else
+                     {
+                         slot4.func_75215_d(itemstack6);
+-                        inventoryplayer.func_70299_a(p_184996_2_, itemstack10);
+-                        slot4.func_190901_a(p_184996_4_, itemstack10);
++                        inventoryplayer.func_70299_a(dragType, itemstack10);
++                        slot4.func_190901_a(player, itemstack10);
+                     }
+                 }
+             }
+         }
+-        else if (p_184996_3_ == ClickType.CLONE && p_184996_4_.field_71075_bZ.field_75098_d && inventoryplayer.func_70445_o().func_190926_b() && p_184996_1_ >= 0)
++        else if (clickTypeIn == ClickType.CLONE && player.field_71075_bZ.field_75098_d && inventoryplayer.func_70445_o().func_190926_b() && slotId >= 0)
+         {
+-            Slot slot3 = this.field_75151_b.get(p_184996_1_);
++            Slot slot3 = this.field_75151_b.get(slotId);
+ 
+             if (slot3 != null && slot3.func_75216_d())
+             {
+@@ -408,26 +436,40 @@
+                 inventoryplayer.func_70437_b(itemstack5);
+             }
+         }
+-        else if (p_184996_3_ == ClickType.THROW && inventoryplayer.func_70445_o().func_190926_b() && p_184996_1_ >= 0)
++        else if (clickTypeIn == ClickType.THROW && inventoryplayer.func_70445_o().func_190926_b() && slotId >= 0)
+         {
+-            Slot slot2 = this.field_75151_b.get(p_184996_1_);
++            Slot slot2 = this.field_75151_b.get(slotId);
+ 
+-            if (slot2 != null && slot2.func_75216_d() && slot2.func_82869_a(p_184996_4_))
++            if (slot2 != null && slot2.func_75216_d() && slot2.func_82869_a(player))
              {
 -                ItemStack itemstack4 = slot2.func_75209_a(p_184996_2_ == 0 ? 1 : slot2.func_75211_c().func_190916_E());
 -                slot2.func_190901_a(p_184996_4_, itemstack4);
@@ -38,24 +289,92 @@
 +                /*
 +                 * Adding Ctrl + Q to craft and throw. CARPET-XCOM
 +                 */
-+                if(CarpetSettings.ctrlQCraftingFix && p_184996_1_ == 0 && p_184996_2_ == 1)
++                if(CarpetSettings.ctrlQCraftingFix && slotId == 0 && dragType == 1)
 +                {
 +                    while (slot2.func_75216_d()) {
-+                        this.func_184996_a(p_184996_1_, 0, ClickType.THROW, p_184996_4_);
++                        this.func_184996_a(slotId, 0, ClickType.THROW, player);
 +                    }
 +                    this.func_75142_b();
 +                }
 +                else
 +                {
 +                    // Changed method for auto crafter CARPET-XCOM
-+                    ItemStack itemstack4 = decrStackSize(p_184996_4_, p_184996_1_, p_184996_2_ == 0 ? 1 : slot2.func_75211_c().func_190916_E());
-+                    slot2.func_190901_a(p_184996_4_, itemstack4);
-+                    p_184996_4_.func_71019_a(itemstack4, true);
++                    ItemStack itemstack4 = decrStackSize(player, slotId, dragType == 0 ? 1 : slot2.func_75211_c().func_190916_E());
++                    slot2.func_190901_a(player, itemstack4);
++                    player.func_71019_a(itemstack4, true);
 +                }
              }
          }
-         else if (p_184996_3_ == ClickType.PICKUP_ALL && p_184996_1_ >= 0)
-@@ -762,4 +779,10 @@
+-        else if (p_184996_3_ == ClickType.PICKUP_ALL && p_184996_1_ >= 0)
++        else if (clickTypeIn == ClickType.PICKUP_ALL && slotId >= 0)
+         {
+-            Slot slot = this.field_75151_b.get(p_184996_1_);
++            Slot slot = this.field_75151_b.get(slotId);
+             ItemStack itemstack1 = inventoryplayer.func_70445_o();
+ 
+-            if (!itemstack1.func_190926_b() && (slot == null || !slot.func_75216_d() || !slot.func_82869_a(p_184996_4_)))
++            if (!itemstack1.func_190926_b() && (slot == null || !slot.func_75216_d() || !slot.func_82869_a(player)))
+             {
+-                int i = p_184996_2_ == 0 ? 0 : this.field_75151_b.size() - 1;
+-                int j = p_184996_2_ == 0 ? 1 : -1;
++                int i = dragType == 0 ? 0 : this.field_75151_b.size() - 1;
++                int j = dragType == 0 ? 1 : -1;
+ 
+                 for (int k = 0; k < 2; ++k)
+                 {
+@@ -435,7 +477,7 @@
+                     {
+                         Slot slot1 = this.field_75151_b.get(l);
+ 
+-                        if (slot1.func_75216_d() && func_94527_a(slot1, itemstack1, true) && slot1.func_82869_a(p_184996_4_) && this.func_94530_a(itemstack1, slot1))
++                        if (slot1.func_75216_d() && func_94527_a(slot1, itemstack1, true) && slot1.func_82869_a(player) && this.func_94530_a(itemstack1, slot1))
+                         {
+                             ItemStack itemstack2 = slot1.func_75211_c();
+ 
+@@ -450,7 +492,7 @@
+                                     slot1.func_75215_d(ItemStack.field_190927_a);
+                                 }
+ 
+-                                slot1.func_190901_a(p_184996_4_, itemstack3);
++                                slot1.func_190901_a(player, itemstack3);
+                             }
+                         }
+                     }
+@@ -555,7 +597,7 @@
+                 Slot slot = this.field_75151_b.get(i);
+                 ItemStack itemstack = slot.func_75211_c();
+ 
+-                if (!itemstack.func_190926_b() && itemstack.func_77973_b() == p_75135_1_.func_77973_b() && (!p_75135_1_.func_77981_g() || p_75135_1_.func_77960_j() == itemstack.func_77960_j()) && ItemStack.func_77970_a(p_75135_1_, itemstack))
++                if (!itemstack.func_190926_b() && itemstack.func_77973_b() == p_75135_1_.func_77973_b() && (!p_75135_1_.func_77981_g() || p_75135_1_.func_77960_j() == itemstack.func_77960_j()) && ItemStack.func_77970_a(p_75135_1_, itemstack) && carpet.helpers.ShadowItems.mergeCheck(p_75135_1_, itemstack, true)) //AqCM
+                 {
+                     int j = itemstack.func_190916_E() + p_75135_1_.func_190916_E();
+ 
+@@ -616,6 +658,15 @@
+ 
+                 if (itemstack1.func_190926_b() && slot1.func_75214_a(p_75135_1_))
+                 {
++                    //AqCM - move the shadow stack whole, the caller clears the source slot
++                    if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(p_75135_1_) && p_75135_1_.func_190916_E() <= slot1.func_75219_a())
++                    {
++                        slot1.func_75215_d(p_75135_1_);
++                        carpet.helpers.ShadowItems.movedWhole = p_75135_1_;
++                        flag = true;
++                        break;
++                    }
++
+                     if (p_75135_1_.func_190916_E() > slot1.func_75219_a())
+                     {
+                         slot1.func_75215_d(p_75135_1_.func_77979_a(slot1.func_75219_a()));
+@@ -680,6 +731,8 @@
+     {
+         boolean flag = p_94527_0_ == null || !p_94527_0_.func_75216_d();
+ 
++        if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && !flag && (carpet.helpers.ShadowItems.isShadow(p_94527_1_) || carpet.helpers.ShadowItems.isShadow(p_94527_0_.func_75211_c()))) return false; //AqCM
++
+         if (!flag && p_94527_1_.func_77969_a(p_94527_0_.func_75211_c()) && ItemStack.func_77970_a(p_94527_0_.func_75211_c(), p_94527_1_))
+         {
+             return p_94527_0_.func_75211_c().func_190916_E() + (p_94527_2_ ? 0 : p_94527_1_.func_190916_E()) <= p_94527_1_.func_77976_d();
+@@ -762,4 +815,10 @@
              entityplayermp.field_71135_a.func_147359_a(new SPacketSetSlot(this.field_75152_c, 0, itemstack));
          }
      }

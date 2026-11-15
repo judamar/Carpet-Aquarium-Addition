@@ -9,6 +9,15 @@
  public class EntityLlama extends AbstractChestHorse implements IRangedAttackMob
  {
      private static final DataParameter<Integer> field_190720_bG = EntityDataManager.<Integer>func_187226_a(EntityLlama.class, DataSerializers.field_187192_b);
+@@ -100,7 +102,7 @@
+ 
+         if (p_70037_1_.func_150297_b("DecorItem", 10))
+         {
+-            this.field_110296_bG.func_70299_a(1, new ItemStack(p_70037_1_.func_74775_l("DecorItem")));
++            this.field_110296_bG.func_70299_a(1, carpet.helpers.ShadowItems.load(p_70037_1_.func_74775_l("DecorItem"))); //AqCM
+         }
+ 
+         this.func_110232_cE();
 @@ -192,7 +194,7 @@
              j = 6;
              f = 10.0F;

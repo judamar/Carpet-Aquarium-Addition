@@ -72,6 +72,7 @@ public class Logger
         handlers.put(playerName, handler);
         handler.onAddPlayer(playerName);
         LoggerRegistry.setAccess(this);
+        if ("missingTools".equals(logName)) carpet.carpetclient.CarpetClientRuleChanger.updateMissingTools(playerName); //AqCM
     }
 
     /**
@@ -83,6 +84,7 @@ public class Logger
         subscribedPlayers.remove(playerName);
         handlers.remove(playerName);
         LoggerRegistry.setAccess(this);
+        if ("missingTools".equals(logName)) carpet.carpetclient.CarpetClientRuleChanger.updateMissingTools(playerName); //AqCM
     }
     
     /**

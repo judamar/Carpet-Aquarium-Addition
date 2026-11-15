@@ -1,0 +1,22 @@
+--- ../src-base/minecraft/net/minecraft/inventory/Slot.java
++++ ../src-work/minecraft/net/minecraft/inventory/Slot.java
+@@ -64,6 +64,7 @@
+ 
+     public void func_75215_d(ItemStack p_75215_1_)
+     {
++        if (carpet.CarpetSettings.shadowItemUpdateFix) { this.func_75211_c().removeSlot(this.field_75224_c, this.field_75225_a); p_75215_1_.addSlot(this.field_75224_c, this.field_75225_a); } //AqCM
+         this.field_75224_c.func_70299_a(this.field_75225_a, p_75215_1_);
+         this.func_75218_e();
+     }
+@@ -85,6 +86,11 @@
+ 
+     public ItemStack func_75209_a(int p_75209_1_)
+     {
++        //AqCM - whole shadow stack moves keep the instance
++        if (carpet.CarpetSettings.shadowItemInventoryFragilityFix && carpet.helpers.ShadowItems.isShadow(this.func_75211_c()) && p_75209_1_ >= this.func_75211_c().func_190916_E())
++        {
++            return this.field_75224_c.func_70304_b(this.field_75225_a);
++        }
+         return this.field_75224_c.func_70298_a(this.field_75225_a, p_75209_1_);
+     }
+ 

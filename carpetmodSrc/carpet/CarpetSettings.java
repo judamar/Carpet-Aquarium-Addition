@@ -1133,9 +1133,14 @@ public class CarpetSettings {
     @SurvivalDefault
     public static boolean carpets = false;
 
-    @Rule(desc = "Pistons, Glass and Sponge can be broken faster with their appropriate tools", category = SURVIVAL)
+    @Rule(desc = "Pistons, Glass and Sponge can be broken faster with their appropriate tools", category = SURVIVAL, extra = {
+            "Players must also run /subscribe missingTools to get the faster mining"
+    })
     @SurvivalDefault
     public static boolean missingTools = false;
+
+    // AqCM - set only while EntityPlayer.getDigSpeed runs, true if the digging player is subscribed to missingTools
+    public static boolean missingToolsActive = false;
 
     @Rule(desc = "Alternative caching strategy for nether portals", category = {SURVIVAL, EXPERIMENTAL})
     @CreativeDefault
@@ -1197,6 +1202,41 @@ public class CarpetSettings {
     @Rule(desc = "DON'T PUT A GOD-DAMN CARPET RULE FOR THIS OR I WILL GET MAD!\n" +
             "Mojang even added this in 16. CARPET-XCOM", category = {CREATIVE, VASTECH})
     public static boolean goddamnCarpetRule = true;
+
+    // AqCM - shadow items, ported from mattymatty97/carpet-shadow
+    @Rule(desc = "What happens to shadow items (one item stack shared by several slots) when saved and loaded again", category = {SHADOW}, extra = {
+            "unlink: shadow items are saved as independent copies (vanilla)",
+            "persist: shadow items re-link when loaded again",
+            "vanish: shadow items disappear when loaded again"
+    })
+    public static ShadowItemMode shadowItemMode = ShadowItemMode.UNLINK;
+
+    public static enum ShadowItemMode { UNLINK, PERSIST, VANISH }
+
+    @Rule(desc = "Fixes shadow items being duplicated or lost when moved through inventories, cursor, shift-click, pickup and drops", category = {SHADOW})
+    public static boolean shadowItemInventoryFragilityFix = false;
+
+    @Rule(desc = "Shadow items never combine with each other (requires shadowItemInventoryFragilityFix)", category = {SHADOW})
+    public static boolean shadowItemPreventCombine = false;
+
+    @Rule(desc = "Length of the ids that identify shadow items", category = {SHADOW}, options = {"5"}, validator = "validateShadowItemIdSize", extra = {
+            "Do not change unless you know what you are doing"
+    })
+    public static int shadowItemIdSize = 5;
+
+    @Rule(desc = "Hoppers and droppers move shadow stacks by instance, keeping them linked and consistent", category = {SHADOW})
+    public static boolean shadowItemTransferFragilityFix = false;
+
+    @Rule(desc = "Changing a shadow item updates every inventory that holds it in the same tick", category = {SHADOW})
+    public static boolean shadowItemUpdateFix = false;
+    private static boolean validateShadowItemIdSize(int value) {
+        try {
+            ShadowItems.setIdLength(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
     @Rule(desc = "It is inconsistent that all modern carpet versions freezes block events on /tick freeze " +
             "but 1.12 carpet doesn't. Here is a fix for that. ", category = {EXPERIMENTAL, VASTECH})
@@ -1316,6 +1356,10 @@ public class CarpetSettings {
 
     @Rule(desc = "Enable bundled LMS implementation", category = {FEATURE, VASTECH})
     public static boolean modLitematicaServerPaster = false;
+
+    @Rule(desc = "Server side of Litematica's 'save schematic on server' (litematica:save). " +
+            "Sends block entity NBT (chest contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
+    public static boolean modLitematicaServerSave = false;
 
     // ===== Bullet ===== //
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
@@ -1465,7 +1509,7 @@ public class CarpetSettings {
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE, SHADOW //AqCM
     }
 
     private static boolean validatePositive(int value) {

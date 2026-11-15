@@ -3,7 +3,10 @@ package carpet.carpetclient;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
+import carpet.CarpetServer;
 import carpet.CarpetSettings;
+import carpet.logging.Logger;
+import carpet.logging.LoggerRegistry;
 import carpet.utils.Messenger;
 import net.minecraft.network.PacketBuffer;
 
@@ -67,6 +70,11 @@ public class CarpetClientRuleChanger {
     }
 
     public static void updateCarpetClientsRule(String rule, String value) {
+        if (rule.equalsIgnoreCase(MISSING_TOOLS)) { //AqCM
+            for (EntityPlayerMP player : CarpetClientServer.getRegisteredPlayers())
+                updateMissingTools(player);
+            return;
+        }
         PacketBuffer data = new PacketBuffer(Unpooled.buffer());
 
         data.writeInt(CarpetClientMessageHandler.RULE_REQUEST);
@@ -75,6 +83,33 @@ public class CarpetClientRuleChanger {
         data.writeString(value);
 
         CarpetClientServer.sender(data);
+    }
+
+    // AqCM - clients also predict mining speed with missingTools, so each one is told true only if subscribed to /subscribe missingTools
+    private static final String MISSING_TOOLS = "missingTools";
+
+    public static String clientValue(String rule, String value, EntityPlayerMP player) {
+        if (!rule.equalsIgnoreCase(MISSING_TOOLS)) return value;
+        Logger logger = LoggerRegistry.getLogger(MISSING_TOOLS);
+        return String.valueOf(CarpetSettings.missingTools && logger != null && logger.subscribed(player));
+    }
+
+    public static void updateMissingTools(String playerName) {
+        if (CarpetServer.minecraft_server == null) return;
+        EntityPlayerMP player = CarpetServer.minecraft_server.getPlayerList().getPlayerByUsername(playerName);
+        if (player != null) updateMissingTools(player);
+    }
+
+    private static void updateMissingTools(EntityPlayerMP player) {
+        if (!CarpetClientServer.isPlayerRegistered(player)) return;
+        PacketBuffer data = new PacketBuffer(Unpooled.buffer());
+
+        data.writeInt(CarpetClientMessageHandler.RULE_REQUEST);
+        data.writeString(MISSING_TOOLS);
+        data.writeInt(CHANGE_RULE);
+        data.writeString(clientValue(MISSING_TOOLS, CarpetSettings.get(MISSING_TOOLS), player));
+
+        CarpetClientServer.sender(data, player);
     }
 
     static void updatePlayerRuleInfo(EntityPlayerMP sender, String rule, String value) {

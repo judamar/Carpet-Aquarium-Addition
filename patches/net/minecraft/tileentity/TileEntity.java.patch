@@ -19,7 +19,19 @@
      private static void func_190560_a(String p_190560_0_, Class <? extends TileEntity > p_190560_1_)
      {
          field_190562_f.func_82595_a(new ResourceLocation(p_190560_0_), p_190560_1_);
-@@ -307,5 +312,6 @@
+@@ -109,6 +114,11 @@
+             {
+                 tileentity.func_190201_b(p_190200_0_);
+                 tileentity.func_145839_a(p_190200_1_);
++                if (carpet.CarpetSettings.shadowItemUpdateFix && tileentity instanceof net.minecraft.inventory.IInventory) //AqCM
++                {
++                    net.minecraft.inventory.IInventory inv = (net.minecraft.inventory.IInventory)tileentity;
++                    for (int slot = 0; slot < inv.func_70302_i_(); slot++) inv.func_70301_a(slot).addSlot(inv, slot);
++                }
+             }
+             catch (Throwable throwable)
+             {
+@@ -307,5 +317,6 @@
          func_190560_a("command_block", TileEntityCommandBlock.class);
          func_190560_a("shulker_box", TileEntityShulkerBox.class);
          func_190560_a("bed", TileEntityBed.class);

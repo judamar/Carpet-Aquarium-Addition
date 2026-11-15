@@ -8,3 +8,21 @@
      protected final void func_70105_a(float p_70105_1_, float p_70105_2_)
      {
          double d0 = this.field_70165_t;
+@@ -264,7 +265,7 @@
+ 
+             for (int i = 0; i < this.field_184800_bx.size(); ++i)
+             {
+-                this.field_184800_bx.set(i, new ItemStack(nbttaglist.func_150305_b(i)));
++                this.field_184800_bx.set(i, carpet.helpers.ShadowItems.load(nbttaglist.func_150305_b(i))); //AqCM
+             }
+         }
+ 
+@@ -274,7 +275,7 @@
+ 
+             for (int j = 0; j < this.field_184799_bw.size(); ++j)
+             {
+-                this.field_184799_bw.set(j, new ItemStack(nbttaglist1.func_150305_b(j)));
++                this.field_184799_bw.set(j, carpet.helpers.ShadowItems.load(nbttaglist1.func_150305_b(j))); //AqCM
+             }
+         }
+ 

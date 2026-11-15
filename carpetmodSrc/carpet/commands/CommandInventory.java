@@ -65,7 +65,7 @@ public class CommandInventory extends CommandCarpetBase {
                                 for (int k = 0; k < nbttaglist.tagCount(); ++k) {
                                     NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(k);
                                     int j = nbttagcompound.getByte("Slot") & 255;
-                                    ItemStack itemstack = new ItemStack(nbttagcompound);
+                                    ItemStack itemstack = carpet.helpers.ShadowItems.load(nbttagcompound); //AqCM
 
                                     if (!itemstack.isEmpty()) {
                                         if (j >= 0 && j < inventoryCustom.entityPlayerOwner.inventory.mainInventory.size()) {
@@ -138,7 +138,7 @@ public class CommandInventory extends CommandCarpetBase {
                                 for (int k = 0; k < nbttaglist.tagCount(); ++k) {
                                     NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(k);
                                     int j = nbttagcompound.getByte("Slot") & 255;
-                                    ItemStack itemstack = new ItemStack(nbttagcompound);
+                                    ItemStack itemstack = carpet.helpers.ShadowItems.load(nbttagcompound); //AqCM
 
                                     if (!itemstack.isEmpty()) {
                                         if (j >= 0 && j < inventoryCustom.getSizeInventory()) {

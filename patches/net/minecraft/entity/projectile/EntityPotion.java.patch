@@ -10,3 +10,12 @@
                                  }
                              }
                          }
+@@ -254,7 +256,7 @@
+     public void func_70037_a(NBTTagCompound p_70037_1_)
+     {
+         super.func_70037_a(p_70037_1_);
+-        ItemStack itemstack = new ItemStack(p_70037_1_.func_74775_l("Potion"));
++        ItemStack itemstack = carpet.helpers.ShadowItems.load(p_70037_1_.func_74775_l("Potion")); //AqCM
+ 
+         if (itemstack.func_190926_b())
+         {

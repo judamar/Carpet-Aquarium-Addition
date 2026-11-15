@@ -74,7 +74,7 @@ public class CarpetClientMessageHandler {
         chunkData.setInteger("netVersion", NET_VERSION);
         NBTTagList listNBT = new NBTTagList();
         for (String rule : list) {
-            String current = CarpetSettings.get(rule);
+            String current = CarpetClientRuleChanger.clientValue(rule, CarpetSettings.get(rule), sender); //AqCM
             String[] options = CarpetSettings.getOptions(rule);
             String def = CarpetSettings.getDefault(rule);
             boolean isfloat = CarpetSettings.isDouble(rule);

@@ -11,6 +11,15 @@
  public abstract class AbstractChestHorse extends AbstractHorse
  {
      private static final DataParameter<Boolean> field_190698_bG = EntityDataManager.<Boolean>func_187226_a(AbstractChestHorse.class, DataSerializers.field_187198_h);
+@@ -134,7 +138,7 @@
+ 
+                 if (j >= 2 && j < this.field_110296_bG.func_70302_i_())
+                 {
+-                    this.field_110296_bG.func_70299_a(j, new ItemStack(nbttagcompound));
++                    this.field_110296_bG.func_70299_a(j, carpet.helpers.ShadowItems.load(nbttagcompound)); //AqCM
+                 }
+             }
+         }
 @@ -238,7 +242,11 @@
              }
              else

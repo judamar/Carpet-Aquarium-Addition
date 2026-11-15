@@ -1,0 +1,18 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryBasic.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryBasic.java
+@@ -109,6 +109,7 @@
+         }
+         else
+         {
++            if (carpet.CarpetSettings.shadowItemUpdateFix) itemstack.removeSlot(this, p_70304_1_); //AqCM
+             this.field_70482_c.set(p_70304_1_, ItemStack.field_190927_a);
+             return itemstack;
+         }
+@@ -116,6 +117,7 @@
+ 
+     public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_)
+     {
++        if (carpet.CarpetSettings.shadowItemUpdateFix) { this.field_70482_c.get(p_70299_1_).removeSlot(this, p_70299_1_); p_70299_2_.addSlot(this, p_70299_1_); } //AqCM
+         this.field_70482_c.set(p_70299_1_, p_70299_2_);
+ 
+         if (!p_70299_2_.func_190926_b() && p_70299_2_.func_190916_E() > this.func_70297_j_())

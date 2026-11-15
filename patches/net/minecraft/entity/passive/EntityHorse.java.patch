@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/passive/EntityHorse.java
++++ ../src-work/minecraft/net/minecraft/entity/passive/EntityHorse.java
+@@ -75,7 +75,7 @@
+ 
+         if (p_70037_1_.func_150297_b("ArmorItem", 10))
+         {
+-            ItemStack itemstack = new ItemStack(p_70037_1_.func_74775_l("ArmorItem"));
++            ItemStack itemstack = carpet.helpers.ShadowItems.load(p_70037_1_.func_74775_l("ArmorItem")); //AqCM
+ 
+             if (!itemstack.func_190926_b() && HorseArmorType.func_188577_b(itemstack.func_77973_b()))
+             {

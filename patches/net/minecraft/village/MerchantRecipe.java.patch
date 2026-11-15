@@ -1,0 +1,19 @@
+--- ../src-base/minecraft/net/minecraft/village/MerchantRecipe.java
++++ ../src-work/minecraft/net/minecraft/village/MerchantRecipe.java
+@@ -102,13 +102,13 @@
+     public void func_77390_a(NBTTagCompound p_77390_1_)
+     {
+         NBTTagCompound nbttagcompound = p_77390_1_.func_74775_l("buy");
+-        this.field_77403_a = new ItemStack(nbttagcompound);
++        this.field_77403_a = carpet.helpers.ShadowItems.load(nbttagcompound); //AqCM
+         NBTTagCompound nbttagcompound1 = p_77390_1_.func_74775_l("sell");
+-        this.field_77402_c = new ItemStack(nbttagcompound1);
++        this.field_77402_c = carpet.helpers.ShadowItems.load(nbttagcompound1); //AqCM
+ 
+         if (p_77390_1_.func_150297_b("buyB", 10))
+         {
+-            this.field_77401_b = new ItemStack(p_77390_1_.func_74775_l("buyB"));
++            this.field_77401_b = carpet.helpers.ShadowItems.load(p_77390_1_.func_74775_l("buyB")); //AqCM
+         }
+ 
+         if (p_77390_1_.func_150297_b("uses", 99))

@@ -48,6 +48,7 @@ public class LoggerRegistry
     public static boolean __damageDebug;
     public static boolean __invisDebug;
     public static boolean __carefulBreak;
+    public static boolean __missingTools;
     public static boolean __normalCameraVision;
     public static boolean __population;
     public static boolean __entityTask;
@@ -82,6 +83,7 @@ public class LoggerRegistry
         registerDebugger("invisDebug", new Logger(server, "invisDebug", null, null, LogHandler.CHAT));
 
         registerGeneric("carefulBreak", new Logger(server, "carefulBreak", null, null, LogHandler.CHAT));
+        registerGeneric("missingTools", new Logger(server, "missingTools", null, null, LogHandler.CHAT));
         registerGeneric("normalCameraVision", new Logger(server, "normalCameraVision", null, null, LogHandler.CHAT));
     }
 
