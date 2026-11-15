@@ -19,6 +19,7 @@ import narcolepticfrog.rsmm.server.RSMMServer;
 
 import carpet.carpetclient.CarpetClientServer;
 
+import carpet.helpers.ShadowItems;
 import carpet.helpers.TickSpeed;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -89,6 +90,7 @@ public class CarpetServer // static for now - easier to handle all around the co
         CarpetSettings.applySettingsFromConf(server);
         LoggerRegistry.initLoggers(server);
         LoggerRegistry.readSaveFile(server);
+        ShadowItems.clear(); //AqCM
         WorldEditBridge.onServerLoaded(server);
 
         // Precache mappings so as not to lag the server later
@@ -149,6 +151,7 @@ public class CarpetServer // static for now - easier to handle all around the co
         HUDController.update_hud(server);
         WorldEditBridge.onStartTick();
         PUBSUB.update(server.getTickCounter());
+        if (server.getTickCounter() % 1000 == 0) ShadowItems.cleanUp(); //AqCM
     }
     public static void playerConnected(EntityPlayerMP player)
     {
