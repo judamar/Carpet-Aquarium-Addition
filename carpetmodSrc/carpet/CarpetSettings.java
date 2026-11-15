@@ -1358,7 +1358,7 @@ public class CarpetSettings {
     public static boolean modLitematicaServerPaster = false;
 
     @Rule(desc = "Server side of Litematica's 'save schematic on server' (litematica:save). " +
-            "Sends block entity NBT (chest contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
+            "Sends block entity NBT (chest contents) and entities (mobs, minecarts with contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
     public static boolean modLitematicaServerSave = false;
 
     // ===== Bullet ===== //
