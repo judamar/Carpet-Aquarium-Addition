@@ -42,7 +42,7 @@ public class CarpetSettings {
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.1.4";
+    public static final String tagVersion = "v0.1.5";
     public static final String carpetVersion = "Carpet Aquarium Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
@@ -1358,7 +1358,7 @@ public class CarpetSettings {
     public static boolean modLitematicaServerPaster = false;
 
     @Rule(desc = "Server side of Litematica's 'save schematic on server' (litematica:save). " +
-            "Sends block entity NBT (chest contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
+            "Sends block entity NBT (chest contents) and entities (mobs, minecarts with contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
     public static boolean modLitematicaServerSave = false;
 
     // ===== Bullet ===== //

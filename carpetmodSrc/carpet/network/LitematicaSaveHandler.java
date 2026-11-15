@@ -3,15 +3,18 @@ package carpet.network;
 import carpet.CarpetSettings;
 import io.netty.buffer.Unpooled;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
@@ -26,7 +29,8 @@ import java.util.Map;
  *
  * Request and response formats mirror litematica.network.SchematicSavePacketHandler and
  * litematica.task.MultiplayerCreateSchematicTask (liteloader_1.12.2 branch).
- * Not supported: entities, scheduled ticks, ExposedBlocksOnly.
+ * Entities (mobs, minecarts with chests, item frames...) are sent with their full NBT.
+ * Not supported: scheduled ticks, ExposedBlocksOnly.
  */
 public class LitematicaSaveHandler implements PluginChannelHandler
 {
@@ -86,7 +90,7 @@ public class LitematicaSaveHandler implements PluginChannelHandler
         for (String name : regionsIn.getKeySet())
         {
             regionsOut.setTag(name, readRegion(world, regionsIn.getIntArray(name),
-                    want.getBoolean("Blocks"), want.getBoolean("BlockEntities")));
+                    want.getBoolean("Blocks"), want.getBoolean("BlockEntities"), want.getBoolean("Entities")));
         }
 
         NBTTagCompound out = new NBTTagCompound();
@@ -109,7 +113,8 @@ public class LitematicaSaveHandler implements PluginChannelHandler
         return dx * dy * dz;
     }
 
-    private static NBTTagCompound readRegion(WorldServer world, int[] b, boolean blocks, boolean tileEntities)
+    private static NBTTagCompound readRegion(WorldServer world, int[] b, boolean blocks, boolean tileEntities,
+                                           boolean entities)
     {
         int sx = b[3] - b[0] + 1, sy = b[4] - b[1] + 1, sz = b[5] - b[2] + 1;
         int[] ids = new int[sx * sy * sz];
@@ -154,6 +159,28 @@ public class LitematicaSaveHandler implements PluginChannelHandler
             }
         }
 
+        NBTTagList entityList = new NBTTagList();
+        if (entities)
+        {
+            AxisAlignedBB box = new AxisAlignedBB(b[0], b[1], b[2], b[3] + 1, b[4] + 1, b[5] + 1);
+
+            // only looks at loaded chunks; players and dead entities are skipped by writeToNBTOptional,
+            // riders are saved inside their vehicle
+            for (Entity entity : world.getEntitiesWithinAABB(Entity.class, box))
+            {
+                NBTTagCompound tag = new NBTTagCompound();
+                if (!entity.writeToNBTOptional(tag)) continue;
+
+                // positions are relative to the region's minimum corner
+                NBTTagList posTag = new NBTTagList();
+                posTag.appendTag(new NBTTagDouble(entity.posX - b[0]));
+                posTag.appendTag(new NBTTagDouble(entity.posY - b[1]));
+                posTag.appendTag(new NBTTagDouble(entity.posZ - b[2]));
+                tag.setTag("Pos", posTag);
+                entityList.appendTag(tag);
+            }
+        }
+
         NBTTagList paletteTag = new NBTTagList();
         for (IBlockState state : palette.keySet())
         {
@@ -170,6 +197,7 @@ public class LitematicaSaveHandler implements PluginChannelHandler
         NBTTagCompound region = new NBTTagCompound();
         region.setTag("Blocks", blocksTag);
         region.setTag("BlockEntities", tiles);
+        if (entities) region.setTag("Entities", entityList);
         return region;
     }
 
