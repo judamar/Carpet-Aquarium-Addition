@@ -1204,7 +1204,7 @@ public class CarpetSettings {
     public static boolean goddamnCarpetRule = true;
 
     // AqCM - shadow items, ported from mattymatty97/carpet-shadow
-    @Rule(desc = "What happens to shadow items (one item stack shared by several slots) when saved and loaded again", category = {FIX, EXPERIMENTAL}, extra = {
+    @Rule(desc = "What happens to shadow items (one item stack shared by several slots) when saved and loaded again", category = {SHADOW}, extra = {
             "unlink: shadow items are saved as independent copies (vanilla)",
             "persist: shadow items re-link when loaded again",
             "vanish: shadow items disappear when loaded again"
@@ -1213,21 +1213,21 @@ public class CarpetSettings {
 
     public static enum ShadowItemMode { UNLINK, PERSIST, VANISH }
 
-    @Rule(desc = "Fixes shadow items being duplicated or lost when moved through inventories, cursor, shift-click, pickup and drops", category = {FIX, EXPERIMENTAL})
+    @Rule(desc = "Fixes shadow items being duplicated or lost when moved through inventories, cursor, shift-click, pickup and drops", category = {SHADOW})
     public static boolean shadowItemInventoryFragilityFix = false;
 
-    @Rule(desc = "Shadow items never combine with each other (requires shadowItemInventoryFragilityFix)", category = {FIX, EXPERIMENTAL})
+    @Rule(desc = "Shadow items never combine with each other (requires shadowItemInventoryFragilityFix)", category = {SHADOW})
     public static boolean shadowItemPreventCombine = false;
 
-    @Rule(desc = "Length of the ids that identify shadow items", category = {FIX, EXPERIMENTAL}, options = {"5"}, validator = "validateShadowItemIdSize", extra = {
+    @Rule(desc = "Length of the ids that identify shadow items", category = {SHADOW}, options = {"5"}, validator = "validateShadowItemIdSize", extra = {
             "Do not change unless you know what you are doing"
     })
     public static int shadowItemIdSize = 5;
 
-    @Rule(desc = "Hoppers and droppers move shadow stacks by instance, keeping them linked and consistent", category = {FIX, EXPERIMENTAL})
+    @Rule(desc = "Hoppers and droppers move shadow stacks by instance, keeping them linked and consistent", category = {SHADOW})
     public static boolean shadowItemTransferFragilityFix = false;
 
-    @Rule(desc = "Changing a shadow item updates every inventory that holds it in the same tick", category = {FIX, EXPERIMENTAL})
+    @Rule(desc = "Changing a shadow item updates every inventory that holds it in the same tick", category = {SHADOW})
     public static boolean shadowItemUpdateFix = false;
     private static boolean validateShadowItemIdSize(int value) {
         try {
@@ -1497,7 +1497,7 @@ public class CarpetSettings {
     }
 
     public static enum RuleCategory {
-        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE
+        TNT, FIX, SURVIVAL, CREATIVE, EXPERIMENTAL, OPTIMIZATIONS, FEATURE, COMMANDS, VASTECH, BULLET, AQUARIUM, STORAGE, SHADOW //AqCM
     }
 
     private static boolean validatePositive(int value) {
