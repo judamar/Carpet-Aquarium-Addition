@@ -1361,6 +1361,9 @@ public class CarpetSettings {
             "Sends block entity NBT (chest contents) and entities (mobs, minecarts with contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
     public static boolean modLitematicaServerSave = false;
 
+    @Rule(desc = "Server side of the ItemTracker client mod (itemtracker:main). Lets ops track an item anywhere in the loaded world (dropped, in containers, minecarts, players); the client draws a line and boxes to it", category = {FEATURE, VASTECH}) //AqCM
+    public static boolean modItemTracker = false;
+
     // ===== Bullet ===== //
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
     public static boolean scoreboardStats;
