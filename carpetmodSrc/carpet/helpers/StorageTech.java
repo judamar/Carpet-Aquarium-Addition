@@ -41,7 +41,8 @@ public class StorageTech {
     // global settings, not persisted
     public static boolean encoderMaxFilling = true;
     public static boolean encoderFillAllSlots = true;
-    public static int encoderItemAmount = 2;
+    public static int encoderItemAmount = 1; //AqCM
+    public static boolean preferUnstackables = true; //AqCM: full 64-unit dummy slots use the wooden hoe
     public static EnumDyeColor shulkerBoxColor = EnumDyeColor.PURPLE;
 
     public static final String[] MODES = {"full", "full_boxes", "prefill", "prefill_unstackables", "single_item", "single_stack", "single_full_box"};
@@ -181,19 +182,22 @@ public class StorageTech {
         Plan plan = new Plan();
         plan.slots = new ItemStack[size];
         int amount = target;
+        boolean tailStarted = false;
         int i = 0;
         for (int slot = 0; slot < size; slot++) {
             ItemStack s;
             if ((size - slot - 1) * 64 < amount) {
                 // tail: fill with whatever is left of the amount, up to a full stack
                 int units = Math.min(amount, 64);
+                if (!tailStarted && amount % 64 != 0) units = amount % 64; //AqCM: partial slot first, full slots (hoes) at the end
+                tailStarted = true;
                 ItemStack t = encoderMaxFilling && i < items.size() ? items.get(i) : null;
                 int w = t == null ? 1 : 64 / t.getMaxStackSize();
                 if (t != null && units % w == 0) {
                     s = withCount(t, units / w);
                     i++;
                 } else {
-                    s = withCount(dummy(false), units); // units not divisible by the item's weight (16-stacks)
+                    s = preferUnstackables && units == 64 ? dummy(true) : withCount(dummy(false), units); // units not divisible by the item's weight (16-stacks)
                 }
                 amount -= units;
             } else {
@@ -270,44 +274,85 @@ public class StorageTech {
     }
 
     /**
-     * Binary sorter: inventories in the row a..b (ordered from a, first = bit 0). Chest i gets the items whose
-     * 1-based index k has bit i set. Throws if the row is not straight or too short for the list.
+     * Binary sorter over every inventory in the cuboid a..b (a double chest counts once). Row order: along the
+     * cuboid's longest axis (ties: skip the axis the halves of a double chest lie on, then x, y, z), starting at
+     * the end where a is; remaining axes break ties. Consecutive groups of perBit inventories form one bit (first
+     * group = bit 0, least significant); every chest of group i gets the items whose 1-based index k has bit i set.
      */
-    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, List<ItemStack> items) throws CommandException { //AqCM
-        int dx = Integer.signum(b.getX() - a.getX()), dy = Integer.signum(b.getY() - a.getY()), dz = Integer.signum(b.getZ() - a.getZ());
-        if ((dx != 0 ? 1 : 0) + (dy != 0 ? 1 : 0) + (dz != 0 ? 1 : 0) > 1) throw new CommandException("from and to must form a straight row (differ in one axis only)");
-        int len = Math.max(Math.abs(b.getX() - a.getX()), Math.max(Math.abs(b.getY() - a.getY()), Math.abs(b.getZ() - a.getZ())));
+    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, int perBit, List<ItemStack> items) throws CommandException { //AqCM
+        int[] ext = {Math.abs(b.getX() - a.getX()) + 1, Math.abs(b.getY() - a.getY()) + 1, Math.abs(b.getZ() - a.getZ()) + 1};
+        int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
         Set<BlockPos> done = new HashSet<>();
         List<IInventory> invs = new ArrayList<>();
-        List<BlockPos> poss = new ArrayList<>();
-        for (int i = 0; i <= len; i++) {
-            BlockPos p = a.add(dx * i, dy * i, dz * i);
-            if (!w.isBlockLoaded(p)) continue;
-            IInventory inv = inventoryAt(w, p, done);
+        List<List<BlockPos>> groups = new ArrayList<>();
+        boolean[] halfAxis = new boolean[3];
+        for (BlockPos p : BlockPos.getAllInBox(a, b)) {
+            if (done.contains(p) || !w.isBlockLoaded(p)) continue;
+            Set<BlockPos> extra = new HashSet<>();
+            IInventory inv = inventoryAt(w, p, extra);
             if (inv == null) continue;
+            List<BlockPos> g = new ArrayList<>();
+            g.add(p);
+            g.addAll(extra);
+            for (BlockPos q : g) {
+                done.add(q);
+                if (q.getX() != p.getX()) halfAxis[0] = true;
+                if (q.getY() != p.getY()) halfAxis[1] = true;
+                if (q.getZ() != p.getZ()) halfAxis[2] = true;
+            }
             invs.add(inv);
-            poss.add(p);
+            groups.add(g);
         }
-        if (invs.isEmpty()) throw new CommandException("No inventories found in the row");
+        if (invs.isEmpty()) throw new CommandException("No inventories found in the cuboid");
+        int max = Math.max(ext[0], Math.max(ext[1], ext[2]));
+        int axis = -1;
+        for (int pass = 0; pass < 2 && axis < 0; pass++)
+            for (int ax = 0; ax < 3 && axis < 0; ax++)
+                if (ext[ax] == max && (pass == 1 || !halfAxis[ax])) axis = ax;
+        final int ax0 = axis;
+        // sort key: position along the row axis (towards b), then the other axes (x, y, z)
+        Comparator<BlockPos> cmp = (p, q) -> {
+            int c = Integer.compare(coord(p, ax0) * sgn[ax0], coord(q, ax0) * sgn[ax0]);
+            for (int ax = 0; c == 0 && ax < 3; ax++) c = Integer.compare(coord(p, ax) * sgn[ax], coord(q, ax) * sgn[ax]);
+            return c;
+        };
+        List<Integer> order = new ArrayList<>();
+        List<BlockPos> rep = new ArrayList<>();
+        for (int i = 0; i < invs.size(); i++) {
+            BlockPos best = groups.get(i).get(0);
+            for (BlockPos q : groups.get(i)) if (cmp.compare(q, best) < 0) best = q;
+            order.add(i);
+            rep.add(best);
+        }
+        order.sort((i, j) -> cmp.compare(rep.get(i), rep.get(j)));
+        if (invs.size() % perBit != 0) throw new CommandException(invs.size() + " inventories do not divide evenly into groups of " + perBit);
+        int bits = invs.size() / perBit;
         int n = items.size();
-        if (invs.size() < 31 && n > (1L << invs.size()) - 1) {
+        if (bits < 31 && n > (1L << bits) - 1) {
             int need = 1;
             while ((1L << need) - 1 < n) need++;
-            throw new CommandException(n + " items need " + need + " chests, but the row has only " + invs.size());
+            throw new CommandException(n + " items need " + need + " bits, but there are only " + bits + " (" + invs.size() + " inventories / " + perBit + " per bit)");
         }
         EncodeResult r = new EncodeResult();
-        for (int i = 0; i < invs.size(); i++) {
+        for (int bit = 0; bit < bits; bit++) {
             List<ItemStack> sub = new ArrayList<>();
             for (int k = 1; k <= n; k++) {
-                if (i < 31 && ((k >> i) & 1) == 0) continue;
+                if (bit < 31 && ((k >> bit) & 1) == 0) continue;
                 ItemStack s = items.get(k - 1);
                 if (s.getMaxStackSize() == 1) r.warnings.add("Skipping unstackable item " + s.getDisplayName());
                 else sub.add(s);
             }
             r.perChest.add(sub.size());
-            report(r, poss.get(i), encode(invs.get(i), sub, signal), invs.get(i), signal);
+            for (int c = 0; c < perBit; c++) {
+                int i = order.get(bit * perBit + c);
+                report(r, rep.get(i), encode(invs.get(i), sub, signal), invs.get(i), signal);
+            }
         }
         return r;
+    }
+
+    private static int coord(BlockPos p, int ax) {
+        return ax == 0 ? p.getX() : ax == 1 ? p.getY() : p.getZ();
     }
 
     /** Rebuilds encoder chests from the non-dummy stackable items already inside them. */

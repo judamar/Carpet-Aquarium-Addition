@@ -24,7 +24,7 @@ import java.util.List;
 
 public class CommandStx extends CommandCarpetBase {
 
-    private static final String[] SETTINGS = {"encoder_max_filling", "encoder_fill_all_slots", "encoder_item_amount", "shulker_box_color"};
+    private static final String[] SETTINGS = {"encoder_max_filling", "encoder_fill_all_slots", "encoder_item_amount", "prefer_unstackables", "shulker_box_color"};
     private static final String[] SOURCES = {"items", "containers", "area", "item_list", "all_items"};
 
     @Override
@@ -34,7 +34,7 @@ public class CommandStx extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> binary <from> <to> <item[:meta]...|item_list <name>> (from = leftmost chest = bit 0) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
+        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>> (any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; every chest of a group gets the same items) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
     }
 
     @Override
@@ -71,16 +71,17 @@ public class CommandStx extends CommandCarpetBase {
                     done(sender, "Filled", StorageTech.encodeFill(sender.getEntityWorld(), from, to, signal, parseLists(server, args, 9)));
                     return;
                 }
-                if (args[2].equals("binary") && args.length >= 10) { //AqCM
-                    BlockPos from = parseBlockPos(sender, args, 3, false);
-                    BlockPos to = parseBlockPos(sender, args, 6, false);
+                if (args[2].equals("binary") && args.length >= 11) { //AqCM
+                    int perBit = parseInt(args[3], 1);
+                    BlockPos from = parseBlockPos(sender, args, 4, false);
+                    BlockPos to = parseBlockPos(sender, args, 7, false);
                     checkVolume(from, to);
                     List<ItemStack> items = new ArrayList<>();
-                    for (List<ItemStack> l : parseLists(server, args, 9)) items.addAll(l);
+                    for (List<ItemStack> l : parseLists(server, args, 10)) items.addAll(l);
                     if (items.isEmpty()) throw new CommandException("No items provided");
-                    StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, items);
+                    StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, perBit, items);
                     for (String w : r.warnings) Messenger.m(sender, "rb WARNING!", "g  " + w);
-                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests with ", "w " + items.size(), "g  items; items per chest: ", "w " + r.perChest);
+                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests (", "w " + r.perChest.size(), "g  bits x " + perBit + " per bit) with ", "w " + items.size(), "g  items; items per bit: ", "w " + r.perChest);
                     return;
                 }
                 if (args[2].equals("fix") && (args.length == 6 || args.length == 9)) {
@@ -237,6 +238,7 @@ public class CommandStx extends CommandCarpetBase {
             Messenger.m(sender, "w encoder_max_filling: ", "g " + StorageTech.encoderMaxFilling);
             Messenger.m(sender, "w encoder_fill_all_slots: ", "g " + StorageTech.encoderFillAllSlots);
             Messenger.m(sender, "w encoder_item_amount: ", "g " + StorageTech.encoderItemAmount);
+            Messenger.m(sender, "w prefer_unstackables: ", "g " + StorageTech.preferUnstackables);
             Messenger.m(sender, "w shulker_box_color: ", "g " + StorageTech.shulkerBoxColor.getName());
             return;
         }
@@ -245,6 +247,7 @@ public class CommandStx extends CommandCarpetBase {
             case "encoder_max_filling": StorageTech.encoderMaxFilling = parseBoolean(args[2]); break;
             case "encoder_fill_all_slots": StorageTech.encoderFillAllSlots = parseBoolean(args[2]); break;
             case "encoder_item_amount": StorageTech.encoderItemAmount = parseInt(args[2], 1, 64); break;
+            case "prefer_unstackables": StorageTech.preferUnstackables = parseBoolean(args[2]); break;
             case "shulker_box_color": {
                 EnumDyeColor c = null;
                 for (EnumDyeColor d : EnumDyeColor.values()) if (d.getName().equalsIgnoreCase(args[2])) c = d;
@@ -281,9 +284,15 @@ public class CommandStx extends CommandCarpetBase {
             case "encoder":
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, "1", "8", "15");
                 if (args.length == 3) return getListOfStringsMatchingLastWord(args, "fill", "binary", "fix");
+                if (args[2].equals("binary")) {
+                    if (args.length == 4) return getListOfStringsMatchingLastWord(args, "1", "2", "3", "6");
+                    if (args.length <= 7) return getTabCompletionCoordinate(args, 4, pos);
+                    if (args.length <= 10) return getTabCompletionCoordinate(args, 7, pos);
+                    return itemOrListCompletions(server, args, 10);
+                }
                 if (args.length <= 6) return getTabCompletionCoordinate(args, 3, pos);
                 if (args.length <= 9) return getTabCompletionCoordinate(args, 6, pos);
-                return args[2].equals("fill") || args[2].equals("binary") ? itemOrListCompletions(server, args, 9) : Collections.<String>emptyList();
+                return args[2].equals("fill") ? itemOrListCompletions(server, args, 9) : Collections.<String>emptyList();
             case "item_list": {
                 List<String> names = StorageTech.listNames(world(server));
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, "create", "list", "info", "delete", "rename", "clone", "edit");
@@ -306,7 +315,7 @@ public class CommandStx extends CommandCarpetBase {
             case "settings":
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, SETTINGS);
                 if (args.length == 3) {
-                    if (args[1].equals("encoder_max_filling") || args[1].equals("encoder_fill_all_slots")) return getListOfStringsMatchingLastWord(args, "true", "false");
+                    if (args[1].equals("encoder_max_filling") || args[1].equals("encoder_fill_all_slots") || args[1].equals("prefer_unstackables")) return getListOfStringsMatchingLastWord(args, "true", "false");
                     if (args[1].equals("shulker_box_color")) {
                         List<String> n = new ArrayList<>();
                         for (EnumDyeColor d : EnumDyeColor.values()) n.add(d.getName());
