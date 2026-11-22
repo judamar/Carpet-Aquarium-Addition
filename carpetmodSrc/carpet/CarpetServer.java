@@ -48,6 +48,7 @@ public class CarpetServer // static for now - easier to handle all around the co
     public static int limitITTCounter;
 
     private static CarpetClientServer CCServer;
+    private static carpet.itemtracker.ItemTrackerServer itemTracker; //AqCM
 
     public static void init(MinecraftServer server) //aka constructor of this static singleton class
     {
@@ -64,6 +65,8 @@ public class CarpetServer // static for now - easier to handle all around the co
 
         CCServer = new CarpetClientServer(server);
         pluginChannels.register(CCServer);
+        itemTracker = new carpet.itemtracker.ItemTrackerServer(server); //AqCM
+        pluginChannels.register(itemTracker);
 
         rsmmServer = new MultimeterServer(server);
         legacyRsmmServer = new RSMMServer(server);
@@ -151,6 +154,7 @@ public class CarpetServer // static for now - easier to handle all around the co
         HUDController.update_hud(server);
         WorldEditBridge.onStartTick();
         PUBSUB.update(server.getTickCounter());
+        itemTracker.tick(); //AqCM
         if (server.getTickCounter() % 1000 == 0) ShadowItems.cleanUp(); //AqCM
     }
     public static void playerConnected(EntityPlayerMP player)
