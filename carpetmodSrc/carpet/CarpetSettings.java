@@ -1419,6 +1419,9 @@ public class CarpetSettings {
     @Rule(desc = "Enables /getfullbox to create a shulker box fully with specified item.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandGetFullBox = false;
 
+    @Rule(desc = "Enables /stx to fill containers in storage tech modes (full, prefill, single stack...), build comparator encoder chests and manage item lists.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandStx = false;
+
     @Rule(desc = "Enables /getallitems to create a chest with all items of the game, can be filtered", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandGetAllItems = false;
 
