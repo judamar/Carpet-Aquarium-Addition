@@ -372,12 +372,12 @@ public class StorageTech {
      * Binary sorter over every inventory in the cuboid a..b (a double chest counts once). Row order: along the
      * cuboid's longest axis (ties: skip the axis the halves of a double chest lie on, then x, y, z), starting at
      * the end where a is; remaining axes break ties. Consecutive groups of perBit inventories form one bit (first
-     * group = bit 0, least significant); the items of group i (those whose 1-based index k has bit i set) fill its chests as a chain (first chest first, overflow to the next, untouched chests left alone).
+     * group = bit 0, least significant); the items of group i (those whose 1-based index k has bit i set) fill its chests as a chain (starting at chest startChest, 1-based, default first; earlier chests are never touched; overflow to the next, untouched chests left alone).
      * The last suffix.length() groups are suffix bits (chars 0/1 in row order): 1 = whole list, 0 = none.
      * signal 0 = auto: chests with dummies keep their signal. A chest with dummies keeps its current signal and only
      * gets the new items appended after its real items (already present ones skipped); others are encoded to signal.
      */
-    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, int perBit, List<ItemStack> items, String suffix) throws CommandException { //AqCM
+    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, int perBit, List<ItemStack> items, String suffix, int startChest) throws CommandException { //AqCM
         int[] ext = {Math.abs(b.getX() - a.getX()) + 1, Math.abs(b.getY() - a.getY()) + 1, Math.abs(b.getZ() - a.getZ()) + 1};
         int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
         Set<BlockPos> done = new HashSet<>();
@@ -425,6 +425,7 @@ public class StorageTech {
         order.sort((i, j) -> cmp.compare(rep.get(i), rep.get(j)));
         if (invs.size() % perBit != 0) throw new CommandException(invs.size() + " inventories do not divide evenly into groups of " + perBit);
         int bits = invs.size() / perBit;
+        if (startChest < 1 || startChest > perBit) throw new CommandException("chest must be between 1 and " + perBit + ", got " + startChest);
         if (suffix.length() >= bits) throw new CommandException("suffix " + suffix + " uses " + suffix.length() + " of " + bits + " bit groups; at least 1 code bit is needed");
         int codeBits = bits - suffix.length();
         int n = items.size();
@@ -436,7 +437,9 @@ public class StorageTech {
         EncodeResult r = new EncodeResult();
         r.codeBits = codeBits;
         if (signal == 0)
-            for (int i : order) {
+            for (int oi = 0; oi < order.size(); oi++) {
+                if (oi % perBit < startChest - 1) continue;
+                int i = order.get(oi);
                 boolean dummy = false;
                 for (int s = 0; s < invs.get(i).getSizeInventory(); s++) dummy |= isDummy(invs.get(i).getStackInSlot(s));
                 if (!dummy) throw new CommandException("chest at " + rep.get(i).getX() + " " + rep.get(i).getY() + " " + rep.get(i).getZ() + " has no signal to keep; pass a signal");
@@ -467,7 +470,7 @@ public class StorageTech {
             }
             int used = 0;
             // chain: the first chest takes what fits, the remainder goes to the next chest of the group
-            for (int c = 0; c < perBit && !rest.isEmpty(); c++) {
+            for (int c = startChest - 1; c < perBit && !rest.isEmpty(); c++) {
                 int i = order.get(bit * perBit + c);
                 IInventory inv = invs.get(i);
                 List<ItemStack> have = new ArrayList<>();
@@ -492,7 +495,7 @@ public class StorageTech {
                 report(r, rep.get(i), plan, inv, sig);
             }
             r.chestsUsed.add(used);
-            if (!rest.isEmpty()) r.warnings.add("Bit " + bit + ": " + rest.size() + " items did not fit in its " + perBit + " chests");
+            if (!rest.isEmpty()) r.warnings.add("Bit " + bit + ": " + rest.size() + " items did not fit in the " + (perBit - startChest + 1) + " chests available from chest " + startChest + " of " + perBit);
         }
         return r;
     }
