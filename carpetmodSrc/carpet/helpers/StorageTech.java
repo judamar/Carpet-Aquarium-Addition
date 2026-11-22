@@ -33,7 +33,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -87,10 +92,81 @@ public class StorageTech {
         return new ItemStack(item, 1, meta);
     }
 
+    // ---- undo (in memory, last UNDO_DEPTH writing operations per sender) ---- //AqCM
+
+    static final int UNDO_DEPTH = 10;
+
+    static class Snap {
+        World w;
+        BlockPos p;
+        ItemStack[] slots;
+    }
+
+    private static final Map<String, Deque<List<Snap>>> undoStacks = new HashMap<>();
+    private static List<Snap> recording; // snapshots of the running operation, null when not recording
+    private static final Map<IInventory, BlockPos> posOf = new IdentityHashMap<>();
+    private static World recWorld;
+
+    public static void beginUndo() {
+        recording = new ArrayList<>();
+        posOf.clear();
+    }
+
+    /** Stores the operation under key if it wrote anything. */
+    public static void endUndo(String key) {
+        List<Snap> op = recording;
+        recording = null;
+        posOf.clear();
+        if (op == null || op.isEmpty()) return;
+        Deque<List<Snap>> d = undoStacks.computeIfAbsent(key, k -> new ArrayDeque<>());
+        d.push(op);
+        while (d.size() > UNDO_DEPTH) d.removeLast();
+    }
+
+    /** Snapshot of inv right before it is written (once per position per operation). */
+    static void snap(IInventory inv) {
+        BlockPos p = posOf.get(inv);
+        if (recording == null || p == null) return;
+        for (Snap o : recording) if (o.p.equals(p)) return;
+        Snap sn = new Snap();
+        sn.w = recWorld;
+        sn.p = p;
+        sn.slots = new ItemStack[inv.getSizeInventory()];
+        for (int i = 0; i < sn.slots.length; i++) sn.slots[i] = inv.getStackInSlot(i).copy();
+        recording.add(sn);
+    }
+
+    /** Pops the sender's latest operation; returns {restored, skipped} or null when there is nothing to undo. */
+    public static int[] undo(String key) {
+        Deque<List<Snap>> d = undoStacks.get(key);
+        if (d == null || d.isEmpty()) return null;
+        int ok = 0, skipped = 0;
+        for (Snap sn : d.pop()) {
+            IInventory inv = inventoryAt(sn.w, sn.p, new HashSet<>());
+            if (inv == null || inv.getSizeInventory() != sn.slots.length) {
+                skipped++;
+                continue;
+            }
+            for (int i = 0; i < sn.slots.length; i++) inv.setInventorySlotContents(i, sn.slots[i].copy());
+            inv.markDirty();
+            ok++;
+        }
+        return new int[]{ok, skipped};
+    }
+
     // ---- inventories ----
 
     /** Inventory at pos (double chests as one 54 slot inventory, once), or null. */
     public static IInventory inventoryAt(World w, BlockPos p, Set<BlockPos> done) {
+        IInventory r = inventoryAt0(w, p, done);
+        if (r != null && recording != null) {
+            posOf.put(r, p);
+            recWorld = w;
+        }
+        return r;
+    }
+
+    private static IInventory inventoryAt0(World w, BlockPos p, Set<BlockPos> done) {
         if (done.contains(p)) return null;
         TileEntity te = w.getTileEntity(p);
         if (te instanceof TileEntityChest && w.getBlockState(p).getBlock() instanceof BlockChest) {
@@ -137,6 +213,7 @@ public class StorageTech {
             if (!w.isBlockLoaded(p)) continue;
             IInventory inv = inventoryAt(w, p, done);
             if (inv == null) continue;
+            snap(inv);
             fill(inv, mode, items.get(n % items.size())); // several items: one per container, cycling
             n++;
         }
@@ -169,6 +246,7 @@ public class StorageTech {
     static class Plan {
         ItemStack[] slots;
         List<ItemStack> skipped = new ArrayList<>();
+        boolean full; //AqCM: keep > 0 and not one new item fits (slots == null)
     }
 
     /**
@@ -245,11 +323,13 @@ public class StorageTech {
         Plan plan = best;
         for (int d = 0; d <= size * 5 && signalOf(plan) != signal; d++) plan = assign(size, items, target + d + 1);
         if (signalOf(plan) == signal) best = plan;
-        if (best.skipped.size() > items.size() - keep) {
+        if (best.skipped.size() > items.size() - keep || (keep > 0 && best.skipped.size() == items.size() - keep && items.size() > keep)) {
+            best.full = best.skipped.size() == items.size() - keep;
             best.slots = null;
             return best;
         }
         // step 3: write
+        snap(inv);
         for (int i = 0; i < size; i++) inv.setInventorySlotContents(i, best.slots[i]);
         inv.markDirty();
         return best;
@@ -258,6 +338,7 @@ public class StorageTech {
     public static class EncodeResult {
         public int affected;
         public List<Integer> perChest = new ArrayList<>(); //AqCM
+        public List<Integer> chestsUsed = new ArrayList<>(); //AqCM: chests of each bit group that received new items
         public int kept, dupes, codeBits; //AqCM: chests that kept their own signal, items already present, code bit groups
         public List<String> warnings = new ArrayList<>();
     }
@@ -291,7 +372,7 @@ public class StorageTech {
      * Binary sorter over every inventory in the cuboid a..b (a double chest counts once). Row order: along the
      * cuboid's longest axis (ties: skip the axis the halves of a double chest lie on, then x, y, z), starting at
      * the end where a is; remaining axes break ties. Consecutive groups of perBit inventories form one bit (first
-     * group = bit 0, least significant); every chest of group i gets the items whose 1-based index k has bit i set.
+     * group = bit 0, least significant); the items of group i (those whose 1-based index k has bit i set) fill its chests as a chain (first chest first, overflow to the next, untouched chests left alone).
      * The last suffix.length() groups are suffix bits (chars 0/1 in row order): 1 = whole list, 0 = none.
      * signal 0 = auto: chests with dummies keep their signal. A chest with dummies keeps its current signal and only
      * gets the new items appended after its real items (already present ones skipped); others are encoded to signal.
@@ -368,7 +449,25 @@ public class StorageTech {
                 if (has && items.get(k - 1).getMaxStackSize() != 1) sub.add(items.get(k - 1));
             }
             r.perChest.add(sub.size());
+            // items already in any chest of the group count as placed
+            List<ItemStack> present = new ArrayList<>();
             for (int c = 0; c < perBit; c++) {
+                IInventory inv = invs.get(order.get(bit * perBit + c));
+                for (int s = 0; s < inv.getSizeInventory(); s++) {
+                    ItemStack st = inv.getStackInSlot(s);
+                    if (!st.isEmpty() && !isDummy(st)) present.add(st);
+                }
+            }
+            List<ItemStack> rest = new ArrayList<>();
+            for (ItemStack s : sub) {
+                boolean dup = false;
+                for (ItemStack h : present) dup |= ItemStack.areItemsEqual(h, s) && ItemStack.areItemStackTagsEqual(h, s);
+                if (dup) r.dupes++;
+                else rest.add(s);
+            }
+            int used = 0;
+            // chain: the first chest takes what fits, the remainder goes to the next chest of the group
+            for (int c = 0; c < perBit && !rest.isEmpty(); c++) {
                 int i = order.get(bit * perBit + c);
                 IInventory inv = invs.get(i);
                 List<ItemStack> have = new ArrayList<>();
@@ -381,15 +480,19 @@ public class StorageTech {
                 int sig = pre ? Container.calcRedstoneFromInventory(inv) : signal;
                 if (pre && signal > 0 && sig != signal) r.kept++;
                 int keep = have.size();
-                for (ItemStack s : sub) {
-                    boolean dup = false;
-                    for (ItemStack h : have.subList(0, keep)) dup |= ItemStack.areItemsEqual(h, s) && ItemStack.areItemStackTagsEqual(h, s);
-                    if (dup) r.dupes++;
-                    else have.add(s);
+                have.addAll(rest);
+                Plan plan = encode(inv, have, sig, keep);
+                if (plan.slots == null) {
+                    if (!plan.full) report(r, rep.get(i), plan, inv, sig); // existing items do not fit: untouched + warning
+                    continue;
                 }
-                if (pre && have.size() == keep) continue; // nothing new: leave the chest as it is
-                report(r, rep.get(i), encode(inv, have, sig, keep), inv, sig);
+                if (plan.skipped.size() < rest.size()) used++;
+                rest = new ArrayList<>(plan.skipped);
+                plan.skipped.clear();
+                report(r, rep.get(i), plan, inv, sig);
             }
+            r.chestsUsed.add(used);
+            if (!rest.isEmpty()) r.warnings.add("Bit " + bit + ": " + rest.size() + " items did not fit in its " + perBit + " chests");
         }
         return r;
     }

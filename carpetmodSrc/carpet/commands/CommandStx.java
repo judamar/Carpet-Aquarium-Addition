@@ -34,7 +34,7 @@ public class CommandStx extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal|auto> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>...> [suffix <bits>] (auto/pre-encoded chests keep their signal and get new items appended; suffix = last groups are fixed bits 0/1 (1 = whole list); any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; every chest of a group gets the same items) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
+        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal|auto> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>...> [suffix <bits>] (auto/pre-encoded chests keep their signal and get new items appended; suffix = last groups are fixed bits 0/1 (1 = whole list); any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; a group is a chain: the bit's items fill its first chest, only the overflow goes to the next chest, untouched chests are left as they are) | /stx encoder <signal> fix <from> [to] | /stx undo (restores the inventories of your last 10 container/encoder operations, newest first) | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
     }
 
     @Override
@@ -45,6 +45,23 @@ public class CommandStx extends CommandCarpetBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (!command_enabled("commandStx", sender)) return;
+        String key = sender instanceof net.minecraft.entity.player.EntityPlayer ? ((net.minecraft.entity.player.EntityPlayer) sender).getUniqueID().toString() : "console"; //AqCM
+        if (args.length > 0 && args[0].equals("undo")) {
+            int[] u = StorageTech.undo(key);
+            if (u == null) Messenger.m(sender, "r Nothing to undo");
+            else Messenger.m(sender, "g Undone: restored ", "w " + u[0], "g  inventories, skipped ", "w " + u[1]);
+            return;
+        }
+        boolean writes = args.length > 0 && (args[0].equals("container") || args[0].equals("encoder"));
+        if (writes) StorageTech.beginUndo();
+        try {
+            run(server, sender, args);
+        } finally {
+            if (writes) StorageTech.endUndo(key);
+        }
+    }
+
+    private void run(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 0) throw new WrongUsageException(getUsage(sender));
 
         switch (args[0]) {
@@ -87,7 +104,7 @@ public class CommandStx extends CommandCarpetBase {
                     if (items.isEmpty()) throw new CommandException("No items provided");
                     StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, perBit, items, suffix);
                     for (String w : r.warnings) Messenger.m(sender, "rb WARNING!", "g  " + w);
-                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests (", "w " + r.perChest.size(), "g  bits x " + perBit + " per bit; code bits " + r.codeBits + (suffix.isEmpty() ? "" : ", suffix " + suffix) + ") with ", "w " + items.size(), "g  items; items per bit: ", "w " + r.perChest,
+                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests (", "w " + r.perChest.size(), "g  bits x " + perBit + " per bit; code bits " + r.codeBits + (suffix.isEmpty() ? "" : ", suffix " + suffix) + ") with ", "w " + items.size(), "g  items; items per bit: ", "w " + r.perChest, "g , chests used: ", "w " + r.chestsUsed,
                             "g " + (r.kept > 0 ? "; " + r.kept + " chests kept their own signal" : "") + (r.dupes > 0 ? "; " + r.dupes + " items already present skipped" : ""));
                     return;
                 }
@@ -289,7 +306,7 @@ public class CommandStx extends CommandCarpetBase {
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
         if (!CarpetSettings.commandStx) return Collections.emptyList();
-        if (args.length == 1) return getListOfStringsMatchingLastWord(args, "container", "encoder", "item_list", "settings");
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, "container", "encoder", "item_list", "undo", "settings");
         switch (args[0]) {
             case "container":
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, StorageTech.MODES);
