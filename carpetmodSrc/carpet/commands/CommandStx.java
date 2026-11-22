@@ -34,7 +34,7 @@ public class CommandStx extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>> (any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; every chest of a group gets the same items) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
+        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal|auto> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>...> [suffix <bits>] (auto/pre-encoded chests keep their signal and get new items appended; suffix = last groups are fixed bits 0/1 (1 = whole list); any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; every chest of a group gets the same items) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
     }
 
     @Override
@@ -63,7 +63,13 @@ public class CommandStx extends CommandCarpetBase {
             }
             case "encoder": {
                 if (args.length < 6) throw new WrongUsageException(getUsage(sender));
-                int signal = parseInt(args[1], 1, 15);
+                String suffix = ""; //AqCM
+                if (args.length >= 3 && args[2].equals("binary") && args.length >= 4 && args[args.length - 2].equals("suffix")) {
+                    suffix = args[args.length - 1];
+                    if (!suffix.matches("[01]+")) throw new CommandException("suffix must be a string of 0 and 1, got " + suffix);
+                    args = Arrays.copyOf(args, args.length - 2);
+                }
+                int signal = args[1].equals("auto") && args[2].equals("binary") ? 0 : parseInt(args[1], 1, 15);
                 if (args[2].equals("fill") && args.length >= 10) {
                     BlockPos from = parseBlockPos(sender, args, 3, false);
                     BlockPos to = parseBlockPos(sender, args, 6, false);
@@ -79,9 +85,10 @@ public class CommandStx extends CommandCarpetBase {
                     List<ItemStack> items = new ArrayList<>();
                     for (List<ItemStack> l : parseLists(server, args, 10)) items.addAll(l);
                     if (items.isEmpty()) throw new CommandException("No items provided");
-                    StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, perBit, items);
+                    StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, perBit, items, suffix);
                     for (String w : r.warnings) Messenger.m(sender, "rb WARNING!", "g  " + w);
-                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests (", "w " + r.perChest.size(), "g  bits x " + perBit + " per bit) with ", "w " + items.size(), "g  items; items per bit: ", "w " + r.perChest);
+                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests (", "w " + r.perChest.size(), "g  bits x " + perBit + " per bit; code bits " + r.codeBits + (suffix.isEmpty() ? "" : ", suffix " + suffix) + ") with ", "w " + items.size(), "g  items; items per bit: ", "w " + r.perChest,
+                            "g " + (r.kept > 0 ? "; " + r.kept + " chests kept their own signal" : "") + (r.dupes > 0 ? "; " + r.dupes + " items already present skipped" : ""));
                     return;
                 }
                 if (args[2].equals("fix") && (args.length == 6 || args.length == 9)) {
@@ -284,13 +291,16 @@ public class CommandStx extends CommandCarpetBase {
                 if (args.length <= 8) return getTabCompletionCoordinate(args, 5, pos);
                 return itemOrListCompletions(server, args, 8);
             case "encoder":
-                if (args.length == 2) return getListOfStringsMatchingLastWord(args, "1", "8", "15");
+                if (args.length == 2) return getListOfStringsMatchingLastWord(args, "1", "8", "15", "auto");
                 if (args.length == 3) return getListOfStringsMatchingLastWord(args, "fill", "binary", "fix");
                 if (args[2].equals("binary")) {
                     if (args.length == 4) return getListOfStringsMatchingLastWord(args, "1", "2", "3", "6");
                     if (args.length <= 7) return getTabCompletionCoordinate(args, 4, pos);
                     if (args.length <= 10) return getTabCompletionCoordinate(args, 7, pos);
-                    return itemOrListCompletions(server, args, 10);
+                    if (args.length >= 12 && args[args.length - 2].equals("suffix")) return Collections.emptyList();
+                    List<String> r = itemOrListCompletions(server, args, 10);
+                    if (args.length >= 12 && "suffix".startsWith(args[args.length - 1])) (r = new ArrayList<>(r)).add("suffix");
+                    return r;
                 }
                 if (args.length <= 6) return getTabCompletionCoordinate(args, 3, pos);
                 if (args.length <= 9) return getTabCompletionCoordinate(args, 6, pos);

@@ -211,7 +211,7 @@ public class StorageTech {
                     continue;
                 }
                 int lim = t.getMaxStackSize();
-                int n = Math.min(encoderItemAmount, lim);
+                int n = Math.min(t.getCount() > 1 ? t.getCount() : encoderItemAmount, lim); //AqCM: existing items keep their count
                 s = withCount(t, n);
                 amount -= n * 64 / lim;
             }
@@ -232,12 +232,21 @@ public class StorageTech {
      * The signal of the plan is checked with vanilla calcRedstoneFromInventory and the amount is nudged up if needed.
      */
     static Plan encode(IInventory inv, List<ItemStack> items, int signal) {
+        return encode(inv, items, signal, 0);
+    }
+
+    /** keep = how many leading items already exist in inv; if one of them would not fit, inv is left untouched (slots == null). */
+    static Plan encode(IInventory inv, List<ItemStack> items, int signal, int keep) {
         int size = inv.getSizeInventory();
         int target = targetUnits(size, signal);
         Plan best = assign(size, items, target);
         Plan plan = best;
         for (int d = 0; d <= size * 5 && signalOf(plan) != signal; d++) plan = assign(size, items, target + d + 1);
         if (signalOf(plan) == signal) best = plan;
+        if (best.skipped.size() > items.size() - keep) {
+            best.slots = null;
+            return best;
+        }
         // step 3: write
         for (int i = 0; i < size; i++) inv.setInventorySlotContents(i, best.slots[i]);
         inv.markDirty();
@@ -247,6 +256,7 @@ public class StorageTech {
     public static class EncodeResult {
         public int affected;
         public List<Integer> perChest = new ArrayList<>(); //AqCM
+        public int kept, dupes, codeBits; //AqCM: chests that kept their own signal, items already present, code bit groups
         public List<String> warnings = new ArrayList<>();
     }
 
@@ -280,8 +290,11 @@ public class StorageTech {
      * cuboid's longest axis (ties: skip the axis the halves of a double chest lie on, then x, y, z), starting at
      * the end where a is; remaining axes break ties. Consecutive groups of perBit inventories form one bit (first
      * group = bit 0, least significant); every chest of group i gets the items whose 1-based index k has bit i set.
+     * The last suffix.length() groups are suffix bits (chars 0/1 in row order): 1 = whole list, 0 = none.
+     * signal 0 = auto: chests with dummies keep their signal. A chest with dummies keeps its current signal and only
+     * gets the new items appended after its real items (already present ones skipped); others are encoded to signal.
      */
-    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, int perBit, List<ItemStack> items) throws CommandException { //AqCM
+    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, int perBit, List<ItemStack> items, String suffix) throws CommandException { //AqCM
         int[] ext = {Math.abs(b.getX() - a.getX()) + 1, Math.abs(b.getY() - a.getY()) + 1, Math.abs(b.getZ() - a.getZ()) + 1};
         int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
         Set<BlockPos> done = new HashSet<>();
@@ -329,25 +342,51 @@ public class StorageTech {
         order.sort((i, j) -> cmp.compare(rep.get(i), rep.get(j)));
         if (invs.size() % perBit != 0) throw new CommandException(invs.size() + " inventories do not divide evenly into groups of " + perBit);
         int bits = invs.size() / perBit;
+        if (suffix.length() >= bits) throw new CommandException("suffix " + suffix + " uses " + suffix.length() + " of " + bits + " bit groups; at least 1 code bit is needed");
+        int codeBits = bits - suffix.length();
         int n = items.size();
-        if (bits < 31 && n > (1L << bits) - 1) {
+        if (codeBits < 31 && n > (1L << codeBits) - 1) {
             int need = 1;
             while ((1L << need) - 1 < n) need++;
-            throw new CommandException(n + " items need " + need + " bits, but there are only " + bits + " (" + invs.size() + " inventories / " + perBit + " per bit)");
+            throw new CommandException(n + " items need " + need + " code bits, but there are only " + codeBits + " (" + invs.size() + " inventories / " + perBit + " per bit" + (suffix.isEmpty() ? "" : ", minus " + suffix.length() + " suffix") + ")");
         }
         EncodeResult r = new EncodeResult();
+        r.codeBits = codeBits;
+        if (signal == 0)
+            for (int i : order) {
+                boolean dummy = false;
+                for (int s = 0; s < invs.get(i).getSizeInventory(); s++) dummy |= isDummy(invs.get(i).getStackInSlot(s));
+                if (!dummy) throw new CommandException("chest at " + rep.get(i).getX() + " " + rep.get(i).getY() + " " + rep.get(i).getZ() + " has no signal to keep; pass a signal");
+            }
+        for (ItemStack s : items) if (s.getMaxStackSize() == 1) r.warnings.add("Skipping unstackable item " + s.getDisplayName());
         for (int bit = 0; bit < bits; bit++) {
             List<ItemStack> sub = new ArrayList<>();
             for (int k = 1; k <= n; k++) {
-                if (bit < 31 && ((k >> bit) & 1) == 0) continue;
-                ItemStack s = items.get(k - 1);
-                if (s.getMaxStackSize() == 1) r.warnings.add("Skipping unstackable item " + s.getDisplayName());
-                else sub.add(s);
+                boolean has = bit < codeBits ? bit < 31 && ((k >> bit) & 1) != 0 : suffix.charAt(bit - codeBits) == '1';
+                if (has && items.get(k - 1).getMaxStackSize() != 1) sub.add(items.get(k - 1));
             }
             r.perChest.add(sub.size());
             for (int c = 0; c < perBit; c++) {
                 int i = order.get(bit * perBit + c);
-                report(r, rep.get(i), encode(invs.get(i), sub, signal), invs.get(i), signal);
+                IInventory inv = invs.get(i);
+                List<ItemStack> have = new ArrayList<>();
+                boolean pre = false;
+                for (int s = 0; s < inv.getSizeInventory(); s++) {
+                    ItemStack st = inv.getStackInSlot(s);
+                    if (isDummy(st)) pre = true;
+                    else if (!st.isEmpty()) have.add(st.copy());
+                }
+                int sig = pre ? Container.calcRedstoneFromInventory(inv) : signal;
+                if (pre && signal > 0 && sig != signal) r.kept++;
+                int keep = have.size();
+                for (ItemStack s : sub) {
+                    boolean dup = false;
+                    for (ItemStack h : have.subList(0, keep)) dup |= ItemStack.areItemsEqual(h, s) && ItemStack.areItemStackTagsEqual(h, s);
+                    if (dup) r.dupes++;
+                    else have.add(s);
+                }
+                if (pre && have.size() == keep) continue; // nothing new: leave the chest as it is
+                report(r, rep.get(i), encode(inv, have, sig, keep), inv, sig);
             }
         }
         return r;
@@ -378,8 +417,12 @@ public class StorageTech {
     }
 
     private static void report(EncodeResult r, BlockPos p, Plan plan, IInventory inv, int signal) {
-        r.affected++;
         String pos = p.getX() + " " + p.getY() + " " + p.getZ();
+        if (plan.slots == null) {
+            r.warnings.add("Chest at " + pos + " left untouched: its existing items plus the new ones do not fit");
+            return;
+        }
+        r.affected++;
         if (!plan.skipped.isEmpty()) {
             List<String> names = new ArrayList<>();
             for (ItemStack s : plan.skipped) names.add(s.getDisplayName());
