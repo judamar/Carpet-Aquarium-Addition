@@ -306,6 +306,48 @@ public class StorageTech {
         return plan;
     }
 
+    static int weight(ItemStack t) { //AqCM: real units of the stack encode would place
+        int lim = t.getMaxStackSize();
+        return Math.min(t.getCount() > 1 ? t.getCount() : encoderItemAmount, lim) * 64 / lim;
+    }
+
+    static int units(Plan p) { //AqCM
+        int u = 0;
+        for (ItemStack s : p.slots) u += s.getCount() * 64 / s.getMaxStackSize();
+        return u;
+    }
+
+    /** Head slots are a weight budget (1 unit per slot): list items go in order while their real weight fits, the first that does not and all after it are skipped. */
+    static Plan assignBudget(int size, List<ItemStack> items, int target) { //AqCM
+        Plan plan = new Plan();
+        plan.slots = new ItemStack[size];
+        int head = 0;
+        while (head < size && (size - head - 1) * 64 >= target - head) head++;
+        int budget = head, i = 0;
+        boolean blocked = false;
+        for (int slot = 0; slot < head; slot++) {
+            ItemStack t = i < items.size() && !blocked ? items.get(i) : null;
+            if (t != null && weight(t) <= budget) {
+                int lim = t.getMaxStackSize();
+                plan.slots[slot] = withCount(t, Math.min(t.getCount() > 1 ? t.getCount() : encoderItemAmount, lim));
+                budget -= weight(t);
+                i++;
+            } else {
+                blocked |= t != null;
+                if (budget > 0 && encoderFillAllSlots) { plan.slots[slot] = dummy(false); budget--; }
+                else plan.slots[slot] = ItemStack.EMPTY;
+            }
+        }
+        for (int amount = target - head, slot = head; slot < size; slot++) {
+            int units = Math.min(amount, 64);
+            if (slot == head && amount % 64 != 0) units = amount % 64;
+            plan.slots[slot] = preferUnstackables && units == 64 ? dummy(true) : withCount(dummy(false), units);
+            amount -= units;
+        }
+        for (; i < items.size(); i++) plan.skipped.add(items.get(i));
+        return plan;
+    }
+
     static int signalOf(Plan plan) {
         InventoryBasic scratch = new InventoryBasic("scratch", false, plan.slots.length);
         for (int i = 0; i < plan.slots.length; i++) scratch.setInventorySlotContents(i, plan.slots[i].copy());
@@ -326,6 +368,12 @@ public class StorageTech {
         int target = targetUnits(size, signal);
         Plan best = assign(size, items, target, true); //AqCM: canonical tail layout if it reads the exact signal
         Plan exact = assign(size, items, target);
+        boolean light = false;
+        for (ItemStack t : items) light |= t.getMaxStackSize() < 64;
+        if (light && !encoderMaxFilling) { //AqCM: 16-stackers weigh more than a slot: keep the chest at the minimum units
+            Plan bp = assignBudget(size, items, target);
+            if (signalOf(bp) == signal && units(bp) == target && bp.skipped.size() <= items.size() - keep && !(keep > 0 && bp.skipped.size() == items.size() - keep && items.size() > keep)) return write(inv, bp);
+        }
         if (signalOf(best) != signal || (encoderMaxFilling && best.skipped.size() > exact.skipped.size())) best = exact; //AqCM: dummy tail (max filling off) wins even if the adaptive plan skips fewer items
         Plan plan = best;
         for (int d = 0; d <= size * 5 && signalOf(plan) != signal; d++) plan = assign(size, items, target + d + 1);
@@ -335,9 +383,12 @@ public class StorageTech {
             best.slots = null;
             return best;
         }
-        // step 3: write
+        return write(inv, best);
+    }
+
+    static Plan write(IInventory inv, Plan best) { //AqCM: step 3
         snap(inv);
-        for (int i = 0; i < size; i++) inv.setInventorySlotContents(i, best.slots[i]);
+        for (int i = 0; i < best.slots.length; i++) inv.setInventorySlotContents(i, best.slots[i]);
         inv.markDirty();
         return best;
     }
@@ -346,7 +397,7 @@ public class StorageTech {
         public int affected;
         public List<Integer> perChest = new ArrayList<>(); //AqCM
         public List<Integer> chestsUsed = new ArrayList<>(); //AqCM: chests of each bit group that received new items
-        public int kept, dupes, codeBits; //AqCM: chests that kept their own signal, items already present, code bit groups
+        public int kept, dupes, codeBits, fallback; //AqCM: chests that kept their own signal, items already present, code bit groups
         public List<String> warnings = new ArrayList<>();
     }
 
@@ -443,9 +494,17 @@ public class StorageTech {
         }
         EncodeResult r = new EncodeResult();
         r.codeBits = codeBits;
+        int[] start = new int[bits]; //AqCM: chest 1 completely empty = not configured, the chain starts there instead of at `chest <n>`
+        for (int bit = 0; bit < bits; bit++) {
+            start[bit] = startChest;
+            IInventory first = invs.get(order.get(bit * perBit));
+            boolean empty = startChest > 1;
+            for (int s = 0; empty && s < first.getSizeInventory(); s++) empty = first.getStackInSlot(s).isEmpty();
+            if (empty) { start[bit] = 1; r.fallback++; }
+        }
         if (signal == 0)
             for (int oi = 0; oi < order.size(); oi++) {
-                if (oi % perBit < startChest - 1) continue;
+                if (oi % perBit < start[oi / perBit] - 1) continue;
                 int i = order.get(oi);
                 boolean dummy = false;
                 for (int s = 0; s < invs.get(i).getSizeInventory(); s++) dummy |= isDummy(invs.get(i).getStackInSlot(s));
@@ -477,7 +536,7 @@ public class StorageTech {
             }
             int used = 0;
             // chain: the first chest takes what fits, the remainder goes to the next chest of the group
-            for (int c = startChest - 1; c < perBit && !rest.isEmpty(); c++) {
+            for (int c = start[bit] - 1; c < perBit && !rest.isEmpty(); c++) {
                 int i = order.get(bit * perBit + c);
                 IInventory inv = invs.get(i);
                 List<ItemStack> have = new ArrayList<>();
@@ -502,7 +561,7 @@ public class StorageTech {
                 report(r, rep.get(i), plan, inv, sig);
             }
             r.chestsUsed.add(used);
-            if (!rest.isEmpty()) r.warnings.add("Bit " + bit + ": " + rest.size() + " items did not fit in the " + (perBit - startChest + 1) + " chests available from chest " + startChest + " of " + perBit);
+            if (!rest.isEmpty()) r.warnings.add("Bit " + bit + ": " + rest.size() + " items did not fit in the " + (perBit - start[bit] + 1) + " chests available from chest " + start[bit] + " of " + perBit);
         }
         return r;
     }
