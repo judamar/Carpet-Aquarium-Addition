@@ -261,6 +261,11 @@ public class StorageTech {
 
     /** Step 2: assign stacks to slots (port of stx _encoderChest, without touching the inventory). */
     static Plan assign(int size, List<ItemStack> items, int target) {
+        return assign(size, items, target, false);
+    }
+
+    /** uniform: head items weigh `count` units (canonical tail: partial slot, then full slots) instead of their real weight. */
+    static Plan assign(int size, List<ItemStack> items, int target, boolean uniform) { //AqCM
         Plan plan = new Plan();
         plan.slots = new ItemStack[size];
         int amount = target;
@@ -293,7 +298,7 @@ public class StorageTech {
                 int lim = t.getMaxStackSize();
                 int n = Math.min(t.getCount() > 1 ? t.getCount() : encoderItemAmount, lim); //AqCM: existing items keep their count
                 s = withCount(t, n);
-                amount -= n * 64 / lim;
+                amount -= uniform ? n : n * 64 / lim; //AqCM
             }
             plan.slots[slot] = s;
         }
@@ -319,7 +324,9 @@ public class StorageTech {
     static Plan encode(IInventory inv, List<ItemStack> items, int signal, int keep) {
         int size = inv.getSizeInventory();
         int target = targetUnits(size, signal);
-        Plan best = assign(size, items, target);
+        Plan best = assign(size, items, target, true); //AqCM: canonical tail layout if it reads the exact signal
+        Plan exact = assign(size, items, target);
+        if (signalOf(best) != signal || best.skipped.size() > exact.skipped.size()) best = exact;
         Plan plan = best;
         for (int d = 0; d <= size * 5 && signalOf(plan) != signal; d++) plan = assign(size, items, target + d + 1);
         if (signalOf(plan) == signal) best = plan;
