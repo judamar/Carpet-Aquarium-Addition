@@ -25,7 +25,7 @@ import java.util.List;
 public class CommandStx extends CommandCarpetBase {
 
     private static final String[] SETTINGS = {"encoder_max_filling", "encoder_fill_all_slots", "encoder_item_amount", "prefer_unstackables", "shulker_box_color"};
-    private static final String[] SOURCES = {"items", "containers", "area", "item_list", "all_items"};
+    private static final String[] SOURCES = {"items", "containers", "item_frames", "area", "item_list", "all_items"};
 
     @Override
     public String getName() {
@@ -124,7 +124,7 @@ public class CommandStx extends CommandCarpetBase {
 
     /** Item source shared by item_list create / edit add. */
     private List<ItemStack> source(MinecraftServer server, ICommandSender sender, String[] args, int i) throws CommandException {
-        if (args.length <= i) throw new WrongUsageException("... <items <items...>|containers <from> [to]|area <from> <to>|all_items <obtainability> [stackability]|item_list <names...>>");
+        if (args.length <= i) throw new WrongUsageException("... <items <items...>|containers <from> [to]|item_frames <from> [to]|area <from> [to] (containers then item frames)|all_items <obtainability> [stackability]|item_list <names...>>");
         List<ItemStack> r = new ArrayList<>();
         switch (args[i]) {
             case "items":
@@ -132,12 +132,14 @@ public class CommandStx extends CommandCarpetBase {
                 for (int j = i + 1; j < args.length; j++) StorageTech.addUnique(r, StorageTech.parseItem(args[j]));
                 return r;
             case "containers":
+            case "item_frames":
             case "area": {
                 if (args.length != i + 4 && args.length != i + 7) throw new WrongUsageException("... " + args[i] + " <from> [to]");
                 BlockPos from = parseBlockPos(sender, args, i + 1, false);
                 BlockPos to = args.length == i + 7 ? parseBlockPos(sender, args, i + 4, false) : from;
                 checkVolume(from, to);
-                return StorageTech.fromContainers(sender.getEntityWorld(), from, to);
+                if (args[i].equals("item_frames")) return StorageTech.fromItemFrames(sender.getEntityWorld(), from, to);
+                return args[i].equals("area") ? StorageTech.fromArea(sender.getEntityWorld(), from, to) : StorageTech.fromContainers(sender.getEntityWorld(), from, to);
             }
             case "all_items": {
                 if (args.length < i + 2 || args.length > i + 3) throw new WrongUsageException("... all_items <obtainability> [stackability]");
@@ -150,7 +152,7 @@ public class CommandStx extends CommandCarpetBase {
                 for (int j = i + 1; j < args.length; j++) for (ItemStack s : StorageTech.readList(world(server), args[j])) StorageTech.addUnique(r, s);
                 return r;
         }
-        throw new WrongUsageException("... <items|containers|area|all_items|item_list> ...");
+        throw new WrongUsageException("... <items|containers|item_frames|area|all_items|item_list> ...");
     }
 
     private void itemList(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
@@ -205,7 +207,7 @@ public class CommandStx extends CommandCarpetBase {
                 List<ItemStack> l = StorageTech.readList(w, name);
                 if (args.length < 4) throw new WrongUsageException("/stx item_list edit <name> <add|remove> ...");
                 if (args[3].equals("add")) {
-                    boolean ordered = args.length > 4 && (args[4].equals("containers") || args[4].equals("area")); //AqCM: no dedupe, index = item number
+                    boolean ordered = args.length > 4 && (args[4].equals("containers") || args[4].equals("item_frames") || args[4].equals("area")); //AqCM: no dedupe, index = item number
                     for (ItemStack s : source(server, sender, args, 4)) { if (ordered) l.add(s); else StorageTech.addUnique(l, s); }
                 } else if (args[3].equals("remove") && args.length >= 6 && args[4].equals("index")) {
                     l.remove(parseInt(args[5], 0, l.size() - 1));
@@ -308,6 +310,7 @@ public class CommandStx extends CommandCarpetBase {
                     case "item_list": return getListOfStringsMatchingLastWord(args, names);
                     case "all_items": return getListOfStringsMatchingLastWord(args, args.length == src + 2 ? GetAllItemsHelper.getObtainabilityOptions() : GetAllItemsHelper.getStackabilityOptions());
                     case "containers":
+                    case "item_frames":
                     case "area": return getTabCompletionCoordinate(args, args.length <= src + 4 ? src + 1 : src + 4, pos);
                 }
                 return Collections.emptyList();

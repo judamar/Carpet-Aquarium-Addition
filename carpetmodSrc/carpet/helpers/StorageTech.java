@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.command.CommandException;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
@@ -22,6 +23,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -452,6 +454,46 @@ public class StorageTech {
                 if (!s.isEmpty()) r.add(withCount(s, 1)); //AqCM
             }
         }
+        return r;
+    }
+
+    /**
+     * Items shown in item frames whose hanging block is in the cuboid a..b, ordered along the longest axis from a
+     * towards b (ties: x, y, z), then by the other axes. Empty frames are skipped, rotation and custom names ignored.
+     */
+    public static List<ItemStack> fromItemFrames(World w, BlockPos a, BlockPos b) { //AqCM
+        int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
+        int[] ext = {Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY()), Math.abs(b.getZ() - a.getZ())};
+        int axis = 0;
+        for (int i = 1; i < 3; i++) if (ext[i] > ext[axis]) axis = i;
+        final int ax0 = axis;
+        AxisAlignedBB box = new AxisAlignedBB(a, b).grow(1);
+        List<EntityItemFrame> frames = new ArrayList<>();
+        for (EntityItemFrame f : w.getEntitiesWithinAABB(EntityItemFrame.class, box)) {
+            BlockPos p = f.getHangingPosition();
+            if (!f.getDisplayedItem().isEmpty() && p.getX() >= Math.min(a.getX(), b.getX()) && p.getX() <= Math.max(a.getX(), b.getX())
+                    && p.getY() >= Math.min(a.getY(), b.getY()) && p.getY() <= Math.max(a.getY(), b.getY())
+                    && p.getZ() >= Math.min(a.getZ(), b.getZ()) && p.getZ() <= Math.max(a.getZ(), b.getZ())) frames.add(f);
+        }
+        frames.sort((f, g) -> {
+            BlockPos p = f.getHangingPosition(), q = g.getHangingPosition();
+            int c = Integer.compare(coord(p, ax0) * sgn[ax0], coord(q, ax0) * sgn[ax0]);
+            for (int ax = 0; c == 0 && ax < 3; ax++) c = Integer.compare(coord(p, ax) * sgn[ax], coord(q, ax) * sgn[ax]);
+            return c != 0 ? c : f.getUniqueID().compareTo(g.getUniqueID()); // same block, two frames: stable
+        });
+        List<ItemStack> r = new ArrayList<>();
+        for (EntityItemFrame f : frames) {
+            ItemStack s = withCount(f.getDisplayedItem(), 1);
+            s.clearCustomName();
+            r.add(s);
+        }
+        return r;
+    }
+
+    /** Containers first, then item frames. */
+    public static List<ItemStack> fromArea(World w, BlockPos a, BlockPos b) {
+        List<ItemStack> r = fromContainers(w, a, b);
+        r.addAll(fromItemFrames(w, a, b));
         return r;
     }
 
