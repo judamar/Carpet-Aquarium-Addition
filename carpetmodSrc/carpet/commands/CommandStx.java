@@ -279,7 +279,7 @@ public class CommandStx extends CommandCarpetBase {
                 if (edit && args.length == 4) return getListOfStringsMatchingLastWord(args, "add", "remove");
                 if (edit && args[3].equals("remove")) return args.length == 5 ? getListOfStringsMatchingLastWord(args, "index", "items") : getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys());
                 int src = args[1].equals("create") ? 3 : edit && args[3].equals("add") ? 4 : -1;
-                if (src < 0) return Collections.emptyList();
+                if (src < 0 || args.length <= src) return Collections.emptyList(); //AqCM: args.length==3 is the new list name
                 if (args.length == src + 1) return getListOfStringsMatchingLastWord(args, SOURCES);
                 switch (args[src]) {
                     case "items": return getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys());

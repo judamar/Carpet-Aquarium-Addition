@@ -78,7 +78,7 @@ public class StorageTech {
             } catch (NumberFormatException ignored) {
             }
         }
-        if (item == null) throw new CommandException("Unknown item: " + text);
+        if (item == null || item == Items.AIR) throw new CommandException("Unknown item: " + text); //AqCM
         return new ItemStack(item, 1, meta);
     }
 
@@ -371,7 +371,7 @@ public class StorageTech {
     /** All registry items (and their variants) matching the same filters as /getallitems. */
     public static List<ItemStack> allItems(String obtainability, String stackability) {
         List<Item> items = new ArrayList<>();
-        for (Item i : Item.REGISTRY) if (GetAllItemsHelper.filterItem(i, obtainability, stackability)) items.add(i);
+        for (Item i : Item.REGISTRY) if (i != Items.AIR && GetAllItemsHelper.filterItem(i, obtainability, stackability)) items.add(i);
         items.sort(Comparator.comparing(Item::getTranslationKey));
         List<ItemStack> r = new ArrayList<>();
         for (Item i : items) for (ItemStack s : GetAllItemsHelper.getItemVariants(i)) addUnique(r, s);
