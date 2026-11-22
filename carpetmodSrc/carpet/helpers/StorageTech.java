@@ -42,22 +42,22 @@ public class StorageTech {
     public static boolean encoderMaxFilling = true;
     public static boolean encoderFillAllSlots = true;
     public static int encoderItemAmount = 1; //AqCM
-    public static boolean preferUnstackables = true; //AqCM: full 64-unit dummy slots use the wooden hoe
+    public static boolean preferUnstackables = true; //AqCM: full 64-unit dummy slots use the wooden axe
     public static EnumDyeColor shulkerBoxColor = EnumDyeColor.PURPLE;
 
     public static final String[] MODES = {"full", "full_boxes", "prefill", "prefill_unstackables", "single_item", "single_stack", "single_full_box"};
 
     // ---- items ----
 
-    /** Dummy items are fixed: barrier named "Blocker" (stackable) and a plain wooden hoe (unstackable). */
+    /** Dummy items are fixed: barrier named "Blocker" (stackable) and a plain wooden axe (unstackable). */
     public static ItemStack dummy(boolean unstackable) {
-        ItemStack s = new ItemStack(unstackable ? Items.WOODEN_HOE : Item.getItemFromBlock(Blocks.BARRIER));
+        ItemStack s = new ItemStack(unstackable ? Items.WOODEN_AXE : Item.getItemFromBlock(Blocks.BARRIER));
         if (!unstackable) s.setStackDisplayName("Blocker");
         return s;
     }
 
     static boolean isDummy(ItemStack s) {
-        if (s.getItem() == Items.WOODEN_HOE) return !s.hasDisplayName();
+        if (s.getItem() == Items.WOODEN_AXE) return !s.hasDisplayName();
         return s.getItem() == Item.getItemFromBlock(Blocks.BARRIER) && s.hasDisplayName() && "Blocker".equals(s.getDisplayName());
     }
 
@@ -189,7 +189,7 @@ public class StorageTech {
             if ((size - slot - 1) * 64 < amount) {
                 // tail: fill with whatever is left of the amount, up to a full stack
                 int units = Math.min(amount, 64);
-                if (!tailStarted && amount % 64 != 0) units = amount % 64; //AqCM: partial slot first, full slots (hoes) at the end
+                if (!tailStarted && amount % 64 != 0) units = amount % 64; //AqCM: partial slot first, full slots (axes) at the end
                 tailStarted = true;
                 ItemStack t = encoderMaxFilling && i < items.size() ? items.get(i) : null;
                 int w = t == null ? 1 : 64 / t.getMaxStackSize();
