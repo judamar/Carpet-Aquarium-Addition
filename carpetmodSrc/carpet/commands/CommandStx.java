@@ -34,7 +34,7 @@ public class CommandStx extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
+        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> binary <from> <to> <item[:meta]...|item_list <name>> (from = leftmost chest = bit 0) | /stx encoder <signal> fix <from> [to] | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
     }
 
     @Override
@@ -69,6 +69,18 @@ public class CommandStx extends CommandCarpetBase {
                     BlockPos to = parseBlockPos(sender, args, 6, false);
                     checkVolume(from, to);
                     done(sender, "Filled", StorageTech.encodeFill(sender.getEntityWorld(), from, to, signal, parseLists(server, args, 9)));
+                    return;
+                }
+                if (args[2].equals("binary") && args.length >= 10) { //AqCM
+                    BlockPos from = parseBlockPos(sender, args, 3, false);
+                    BlockPos to = parseBlockPos(sender, args, 6, false);
+                    checkVolume(from, to);
+                    List<ItemStack> items = new ArrayList<>();
+                    for (List<ItemStack> l : parseLists(server, args, 9)) items.addAll(l);
+                    if (items.isEmpty()) throw new CommandException("No items provided");
+                    StorageTech.EncodeResult r = StorageTech.encodeBinary(sender.getEntityWorld(), from, to, signal, items);
+                    for (String w : r.warnings) Messenger.m(sender, "rb WARNING!", "g  " + w);
+                    Messenger.m(sender, "g Binary encoded ", "w " + r.affected, "g  chests with ", "w " + items.size(), "g  items; items per chest: ", "w " + r.perChest);
                     return;
                 }
                 if (args[2].equals("fix") && (args.length == 6 || args.length == 9)) {
@@ -192,7 +204,8 @@ public class CommandStx extends CommandCarpetBase {
                 List<ItemStack> l = StorageTech.readList(w, name);
                 if (args.length < 4) throw new WrongUsageException("/stx item_list edit <name> <add|remove> ...");
                 if (args[3].equals("add")) {
-                    for (ItemStack s : source(server, sender, args, 4)) StorageTech.addUnique(l, s);
+                    boolean ordered = args.length > 4 && (args[4].equals("containers") || args[4].equals("area")); //AqCM: no dedupe, index = item number
+                    for (ItemStack s : source(server, sender, args, 4)) { if (ordered) l.add(s); else StorageTech.addUnique(l, s); }
                 } else if (args[3].equals("remove") && args.length >= 6 && args[4].equals("index")) {
                     l.remove(parseInt(args[5], 0, l.size() - 1));
                 } else if (args[3].equals("remove") && args.length >= 6 && args[4].equals("items")) {
@@ -267,10 +280,10 @@ public class CommandStx extends CommandCarpetBase {
                 return itemOrListCompletions(server, args, 8);
             case "encoder":
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, "1", "8", "15");
-                if (args.length == 3) return getListOfStringsMatchingLastWord(args, "fill", "fix");
+                if (args.length == 3) return getListOfStringsMatchingLastWord(args, "fill", "binary", "fix");
                 if (args.length <= 6) return getTabCompletionCoordinate(args, 3, pos);
                 if (args.length <= 9) return getTabCompletionCoordinate(args, 6, pos);
-                return args[2].equals("fill") ? itemOrListCompletions(server, args, 9) : Collections.<String>emptyList();
+                return args[2].equals("fill") || args[2].equals("binary") ? itemOrListCompletions(server, args, 9) : Collections.<String>emptyList();
             case "item_list": {
                 List<String> names = StorageTech.listNames(world(server));
                 if (args.length == 2) return getListOfStringsMatchingLastWord(args, "create", "list", "info", "delete", "rename", "clone", "edit");

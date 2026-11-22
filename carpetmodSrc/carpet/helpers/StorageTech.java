@@ -240,6 +240,7 @@ public class StorageTech {
 
     public static class EncodeResult {
         public int affected;
+        public List<Integer> perChest = new ArrayList<>(); //AqCM
         public List<String> warnings = new ArrayList<>();
     }
 
@@ -264,6 +265,47 @@ public class StorageTech {
             if (usable.size() > 1 && idx >= usable.size()) continue;
             report(r, p, encode(inv, usable.get(usable.size() > 1 ? idx : 0), signal), inv, signal);
             idx++;
+        }
+        return r;
+    }
+
+    /**
+     * Binary sorter: inventories in the row a..b (ordered from a, first = bit 0). Chest i gets the items whose
+     * 1-based index k has bit i set. Throws if the row is not straight or too short for the list.
+     */
+    public static EncodeResult encodeBinary(World w, BlockPos a, BlockPos b, int signal, List<ItemStack> items) throws CommandException { //AqCM
+        int dx = Integer.signum(b.getX() - a.getX()), dy = Integer.signum(b.getY() - a.getY()), dz = Integer.signum(b.getZ() - a.getZ());
+        if ((dx != 0 ? 1 : 0) + (dy != 0 ? 1 : 0) + (dz != 0 ? 1 : 0) > 1) throw new CommandException("from and to must form a straight row (differ in one axis only)");
+        int len = Math.max(Math.abs(b.getX() - a.getX()), Math.max(Math.abs(b.getY() - a.getY()), Math.abs(b.getZ() - a.getZ())));
+        Set<BlockPos> done = new HashSet<>();
+        List<IInventory> invs = new ArrayList<>();
+        List<BlockPos> poss = new ArrayList<>();
+        for (int i = 0; i <= len; i++) {
+            BlockPos p = a.add(dx * i, dy * i, dz * i);
+            if (!w.isBlockLoaded(p)) continue;
+            IInventory inv = inventoryAt(w, p, done);
+            if (inv == null) continue;
+            invs.add(inv);
+            poss.add(p);
+        }
+        if (invs.isEmpty()) throw new CommandException("No inventories found in the row");
+        int n = items.size();
+        if (invs.size() < 31 && n > (1L << invs.size()) - 1) {
+            int need = 1;
+            while ((1L << need) - 1 < n) need++;
+            throw new CommandException(n + " items need " + need + " chests, but the row has only " + invs.size());
+        }
+        EncodeResult r = new EncodeResult();
+        for (int i = 0; i < invs.size(); i++) {
+            List<ItemStack> sub = new ArrayList<>();
+            for (int k = 1; k <= n; k++) {
+                if (i < 31 && ((k >> i) & 1) == 0) continue;
+                ItemStack s = items.get(k - 1);
+                if (s.getMaxStackSize() == 1) r.warnings.add("Skipping unstackable item " + s.getDisplayName());
+                else sub.add(s);
+            }
+            r.perChest.add(sub.size());
+            report(r, poss.get(i), encode(invs.get(i), sub, signal), invs.get(i), signal);
         }
         return r;
     }
@@ -352,7 +394,7 @@ public class StorageTech {
         return r;
     }
 
-    /** Distinct items found inside the inventories of the cuboid (dummies ignored). */
+    /** Items inside the inventories of the cuboid in scan order and slot order (no dedupe: list index = item number). */
     public static List<ItemStack> fromContainers(World w, BlockPos a, BlockPos b) {
         List<ItemStack> r = new ArrayList<>();
         Set<BlockPos> done = new HashSet<>();
@@ -362,7 +404,7 @@ public class StorageTech {
             if (inv == null) continue;
             for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack s = inv.getStackInSlot(i);
-                if (!s.isEmpty() && !isDummy(s)) addUnique(r, s);
+                if (!s.isEmpty()) r.add(withCount(s, 1)); //AqCM
             }
         }
         return r;
