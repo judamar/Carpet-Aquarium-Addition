@@ -48,7 +48,7 @@ import java.util.Set;
 /** Storage tech helper behind /stx (container fill modes, encoder chests, item lists). */
 public class StorageTech {
     // global settings, not persisted
-    public static boolean encoderMaxFilling = true;
+    public static boolean encoderMaxFilling = false; //AqCM: off = the signal tail is only dummies (Blocker + axes); on = real items may fill the tail
     public static boolean encoderFillAllSlots = true;
     public static int encoderItemAmount = 1; //AqCM
     public static boolean preferUnstackables = true; //AqCM: full 64-unit dummy slots use the wooden axe
@@ -326,7 +326,7 @@ public class StorageTech {
         int target = targetUnits(size, signal);
         Plan best = assign(size, items, target, true); //AqCM: canonical tail layout if it reads the exact signal
         Plan exact = assign(size, items, target);
-        if (signalOf(best) != signal || best.skipped.size() > exact.skipped.size()) best = exact;
+        if (signalOf(best) != signal || (encoderMaxFilling && best.skipped.size() > exact.skipped.size())) best = exact; //AqCM: dummy tail (max filling off) wins even if the adaptive plan skips fewer items
         Plan plan = best;
         for (int d = 0; d <= size * 5 && signalOf(plan) != signal; d++) plan = assign(size, items, target + d + 1);
         if (signalOf(plan) == signal) best = plan;

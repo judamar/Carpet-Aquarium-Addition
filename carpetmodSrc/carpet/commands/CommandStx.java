@@ -34,7 +34,7 @@ public class CommandStx extends CommandCarpetBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal|auto> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>...> [suffix <bits>] [chest <n>] (chest = 1-based chest of every bit group where the chain starts, default 1, earlier chests untouched; auto/pre-encoded chests keep their signal and get new items appended; suffix = last groups are fixed bits 0/1 (1 = whole list); any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; a group is a chain: the bit's items fill its first chest, only the overflow goes to the next chest, untouched chests are left as they are) | /stx encoder <signal> fix <from> [to] | /stx undo (restores the inventories of your last 10 container/encoder operations, newest first) | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value]";
+        return "/stx container <mode> <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal> fill <from> <to> <item[:meta]...|item_list <name>...> | /stx encoder <signal|auto> binary <chests_per_bit> <from> <to> <item[:meta]...|item_list <name>...> [suffix <bits>] [chest <n>] (chest = 1-based chest of every bit group where the chain starts, default 1, earlier chests untouched; auto/pre-encoded chests keep their signal and get new items appended; suffix = last groups are fixed bits 0/1 (1 = whole list); any cuboid; double chests count once; row runs along the longest axis starting at from; first group of chests_per_bit = bit 0; a group is a chain: the bit's items fill its first chest, only the overflow goes to the next chest, untouched chests are left as they are) | /stx encoder <signal> fix <from> [to] | /stx undo (restores the inventories of your last 10 container/encoder operations, newest first) | /stx item_list <create|list|info|delete|rename|clone|edit> | /stx settings [name value] (encoder_max_filling is off by default: the last slots of an encoder chest are always the Blocker + wooden axe dummies; on lets real items fill them)";
     }
 
     @Override
@@ -279,7 +279,7 @@ public class CommandStx extends CommandCarpetBase {
 
     private void settings(ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 1) {
-            Messenger.m(sender, "w encoder_max_filling: ", "g " + StorageTech.encoderMaxFilling);
+            Messenger.m(sender, "w encoder_max_filling: ", "g " + StorageTech.encoderMaxFilling, "g  (off by default: the last slots are always the Blocker + axe dummies so the config tail never changes; on = real items may fill the tail)"); //AqCM
             Messenger.m(sender, "w encoder_fill_all_slots: ", "g " + StorageTech.encoderFillAllSlots);
             Messenger.m(sender, "w encoder_item_amount: ", "g " + StorageTech.encoderItemAmount);
             Messenger.m(sender, "w prefer_unstackables: ", "g " + StorageTech.preferUnstackables);
