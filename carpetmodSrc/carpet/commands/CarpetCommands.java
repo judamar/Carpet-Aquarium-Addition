@@ -32,6 +32,7 @@ public class CarpetCommands {
         handler.registerCommand(new CommandFillBiome());
         handler.registerCommand(new CommandGetAllItems()); //AQ_CM - Storage
         handler.registerCommand(new CommandGetFullBox()); //AQ_CM - Storage
+        handler.registerCommand(new CommandStx()); //AQ_CM - Storage
         handler.registerCommand(new CommandGMC());
         handler.registerCommand(new CommandGMS());
         handler.registerCommand(new CommandGrow());
