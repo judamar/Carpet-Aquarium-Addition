@@ -4,6 +4,8 @@ package carpet.helpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockShulkerBox;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.init.Blocks;
@@ -533,9 +535,39 @@ public class StorageTech {
         return r;
     }
 
-    /** Containers first, then item frames. */
-    public static List<ItemStack> fromArea(World w, BlockPos a, BlockPos b) {
-        List<ItemStack> r = fromContainers(w, a, b);
+    /**
+     * Items of the blocks in the cuboid (pick-block item, deduped by item+meta), ordered from a towards b like item_frames,
+     * then the item frame items. Air is skipped; blocks without an item are added by name to ignored.
+     */
+    public static List<ItemStack> fromArea(World w, BlockPos a, BlockPos b, List<String> ignored) { //AqCM
+        int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
+        int[] ext = {Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY()), Math.abs(b.getZ() - a.getZ())};
+        int axis = 0;
+        for (int i = 1; i < 3; i++) if (ext[i] > ext[axis]) axis = i;
+        final int ax0 = axis;
+        List<BlockPos> ps = new ArrayList<>();
+        for (BlockPos p : BlockPos.getAllInBox(a, b)) ps.add(p.toImmutable());
+        ps.sort((p, q) -> {
+            int c = Integer.compare(coord(p, ax0) * sgn[ax0], coord(q, ax0) * sgn[ax0]);
+            for (int ax = 0; c == 0 && ax < 3; ax++) c = Integer.compare(coord(p, ax) * sgn[ax], coord(q, ax) * sgn[ax]);
+            return c;
+        });
+        List<ItemStack> r = new ArrayList<>();
+        for (BlockPos p : ps) {
+            if (!w.isBlockLoaded(p)) continue;
+            IBlockState st = w.getBlockState(p);
+            if (st.getMaterial() == Material.AIR) continue;
+            ItemStack s = st.getBlock().getItem(w, p, st);
+            if (s.isEmpty()) {
+                String n = String.valueOf(Block.REGISTRY.getNameForObject(st.getBlock()));
+                if (!ignored.contains(n)) ignored.add(n);
+                continue;
+            }
+            s = withCount(s, 1);
+            boolean dup = false;
+            for (ItemStack t : r) dup |= ItemStack.areItemsEqual(t, s);
+            if (!dup) r.add(s);
+        }
         r.addAll(fromItemFrames(w, a, b));
         return r;
     }

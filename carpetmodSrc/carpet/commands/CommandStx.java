@@ -131,7 +131,7 @@ public class CommandStx extends CommandCarpetBase {
 
     /** Item source shared by item_list create / edit add. */
     private List<ItemStack> source(MinecraftServer server, ICommandSender sender, String[] args, int i) throws CommandException {
-        if (args.length <= i) throw new WrongUsageException("... <items <items...>|containers <from> [to]|item_frames <from> [to]|area <from> [to] (containers then item frames)|all_items <obtainability> [stackability]|item_list <names...>>");
+        if (args.length <= i) throw new WrongUsageException("... <items <items...>|containers <from> [to]|item_frames <from> [to]|area <from> [to] (blocks + item frames)|all_items <obtainability> [stackability]|item_list <names...>>");
         List<ItemStack> r = new ArrayList<>();
         switch (args[i]) {
             case "items":
@@ -146,7 +146,13 @@ public class CommandStx extends CommandCarpetBase {
                 BlockPos to = args.length == i + 7 ? parseBlockPos(sender, args, i + 4, false) : from;
                 checkVolume(from, to);
                 if (args[i].equals("item_frames")) return StorageTech.fromItemFrames(sender.getEntityWorld(), from, to);
-                return args[i].equals("area") ? StorageTech.fromArea(sender.getEntityWorld(), from, to) : StorageTech.fromContainers(sender.getEntityWorld(), from, to);
+                if (args[i].equals("area")) {
+                    List<String> ignored = new ArrayList<>();
+                    List<ItemStack> res = StorageTech.fromArea(sender.getEntityWorld(), from, to, ignored);
+                    if (!ignored.isEmpty()) Messenger.m(sender, "g The following blocks were ignored: ", "w " + String.join(", ", ignored));
+                    return res;
+                }
+                return StorageTech.fromContainers(sender.getEntityWorld(), from, to);
             }
             case "all_items": {
                 if (args.length < i + 2 || args.length > i + 3) throw new WrongUsageException("... all_items <obtainability> [stackability]");
