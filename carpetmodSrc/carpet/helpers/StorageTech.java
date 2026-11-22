@@ -536,8 +536,9 @@ public class StorageTech {
     }
 
     /**
-     * Items of the blocks in the cuboid (pick-block item, deduped by item+meta), ordered from a towards b like item_frames,
-     * then the item frame items. Air is skipped; blocks without an item are added by name to ignored.
+     * Blocks (pick-block item, deduped by item+meta keeping the first) and item frame items (never deduped) of the cuboid
+     * in ONE sequence ordered from a towards b like item_frames; at the same position the block goes before the frames.
+     * Air and empty frames are skipped; blocks without an item are added by name to ignored.
      */
     public static List<ItemStack> fromArea(World w, BlockPos a, BlockPos b, List<String> ignored) { //AqCM
         int[] sgn = {b.getX() >= a.getX() ? 1 : -1, b.getY() >= a.getY() ? 1 : -1, b.getZ() >= a.getZ() ? 1 : -1};
@@ -545,15 +546,9 @@ public class StorageTech {
         int axis = 0;
         for (int i = 1; i < 3; i++) if (ext[i] > ext[axis]) axis = i;
         final int ax0 = axis;
-        List<BlockPos> ps = new ArrayList<>();
-        for (BlockPos p : BlockPos.getAllInBox(a, b)) ps.add(p.toImmutable());
-        ps.sort((p, q) -> {
-            int c = Integer.compare(coord(p, ax0) * sgn[ax0], coord(q, ax0) * sgn[ax0]);
-            for (int ax = 0; c == 0 && ax < 3; ax++) c = Integer.compare(coord(p, ax) * sgn[ax], coord(q, ax) * sgn[ax]);
-            return c;
-        });
-        List<ItemStack> r = new ArrayList<>();
-        for (BlockPos p : ps) {
+        // entry: pos, kind (0 block, 1 frame), stack, frame uuid
+        List<Object[]> es = new ArrayList<>();
+        for (BlockPos p : BlockPos.getAllInBox(a, b)) {
             if (!w.isBlockLoaded(p)) continue;
             IBlockState st = w.getBlockState(p);
             if (st.getMaterial() == Material.AIR) continue;
@@ -563,12 +558,37 @@ public class StorageTech {
                 if (!ignored.contains(n)) ignored.add(n);
                 continue;
             }
-            s = withCount(s, 1);
-            boolean dup = false;
-            for (ItemStack t : r) dup |= ItemStack.areItemsEqual(t, s);
-            if (!dup) r.add(s);
+            es.add(new Object[]{p.toImmutable(), 0, withCount(s, 1), null});
         }
-        r.addAll(fromItemFrames(w, a, b));
+        for (EntityItemFrame f : w.getEntitiesWithinAABB(EntityItemFrame.class, new AxisAlignedBB(a, b).grow(1))) {
+            BlockPos p = f.getHangingPosition();
+            if (f.getDisplayedItem().isEmpty() || p.getX() < Math.min(a.getX(), b.getX()) || p.getX() > Math.max(a.getX(), b.getX())
+                    || p.getY() < Math.min(a.getY(), b.getY()) || p.getY() > Math.max(a.getY(), b.getY())
+                    || p.getZ() < Math.min(a.getZ(), b.getZ()) || p.getZ() > Math.max(a.getZ(), b.getZ())) continue;
+            ItemStack s = withCount(f.getDisplayedItem(), 1);
+            s.clearCustomName();
+            es.add(new Object[]{p, 1, s, f.getUniqueID()});
+        }
+        es.sort((e, g) -> {
+            BlockPos p = (BlockPos) e[0], q = (BlockPos) g[0];
+            int c = Integer.compare(coord(p, ax0) * sgn[ax0], coord(q, ax0) * sgn[ax0]);
+            for (int ax = 0; c == 0 && ax < 3; ax++) c = Integer.compare(coord(p, ax) * sgn[ax], coord(q, ax) * sgn[ax]);
+            if (c == 0) c = Integer.compare((Integer) e[1], (Integer) g[1]);
+            if (c == 0 && e[3] != null) c = ((java.util.UUID) e[3]).compareTo((java.util.UUID) g[3]);
+            return c;
+        });
+        List<ItemStack> r = new ArrayList<>();
+        List<ItemStack> blocks = new ArrayList<>();
+        for (Object[] e : es) {
+            ItemStack s = (ItemStack) e[2];
+            if ((Integer) e[1] == 0) {
+                boolean dup = false;
+                for (ItemStack t : blocks) dup |= ItemStack.areItemsEqual(t, s);
+                if (dup) continue;
+                blocks.add(s);
+            }
+            r.add(s);
+        }
         return r;
     }
 
