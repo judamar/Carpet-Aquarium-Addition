@@ -42,7 +42,7 @@ public class CarpetSettings {
     public static boolean locked = false;
 
     // TODO: replace these constants at build time
-    public static final String tagVersion = "v0.1.5";
+    public static final String tagVersion = "v0.1.6";
     public static final String carpetVersion = "Carpet Aquarium Addition " + tagVersion;
 
     public static final String minecraftVersion = "1.12.2";
@@ -1361,6 +1361,9 @@ public class CarpetSettings {
             "Sends block entity NBT (chest contents) and entities (mobs, minecarts with contents) to clients; any player can request it", category = {FEATURE, VASTECH}) //AqCM
     public static boolean modLitematicaServerSave = false;
 
+    @Rule(desc = "Server side of the ItemTracker client mod (itemtracker:main). Lets ops track an item anywhere in the loaded world (dropped, in containers, minecarts, players); the client draws a line and boxes to it", category = {FEATURE, VASTECH}) //AqCM
+    public static boolean modItemTracker = false;
+
     // ===== Bullet ===== //
     @Rule(desc = "Enables /sb to display player's stats as scoreboard with a total entry", category = {EXPERIMENTAL, SURVIVAL, BULLET, AQUARIUM})
     public static boolean scoreboardStats;
@@ -1415,6 +1418,9 @@ public class CarpetSettings {
 
     @Rule(desc = "Enables /getfullbox to create a shulker box fully with specified item.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandGetFullBox = false;
+
+    @Rule(desc = "Enables /stx to fill containers in storage tech modes (full, prefill, single stack...), build comparator encoder chests and manage item lists.", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
+    public static boolean commandStx = false;
 
     @Rule(desc = "Enables /getallitems to create a chest with all items of the game, can be filtered", category = {AQUARIUM, STORAGE, CREATIVE, COMMANDS})
     public static boolean commandGetAllItems = false;
