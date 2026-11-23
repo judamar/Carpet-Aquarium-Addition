@@ -178,7 +178,7 @@ public class CommandStx extends CommandCarpetBase {
                 if (args[i].equals("area")) {
                     List<String> ignored = new ArrayList<>();
                     List<ItemStack> res = StorageTech.fromArea(sender.getEntityWorld(), from, to, ignored);
-                    if (!ignored.isEmpty()) Messenger.m(sender, "g The following blocks were ignored: ", "w " + String.join(", ", ignored));
+                    if (!ignored.isEmpty()) Messenger.m(sender, "g Skipped while reading the area (no item or duplicate): ", "w " + String.join(", ", ignored));
                     return res;
                 }
                 return StorageTech.fromContainers(sender.getEntityWorld(), from, to);
