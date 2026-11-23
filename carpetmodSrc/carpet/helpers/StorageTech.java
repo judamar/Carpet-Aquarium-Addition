@@ -373,6 +373,7 @@ public class StorageTech {
         if (light && !encoderMaxFilling) { //AqCM: 16-stackers weigh more than a slot: keep the chest at the minimum units
             Plan bp = assignBudget(size, items, target);
             if (signalOf(bp) == signal && units(bp) == target && bp.skipped.size() <= items.size() - keep && !(keep > 0 && bp.skipped.size() == items.size() - keep && items.size() > keep)) return write(inv, bp);
+            if (keep > 0) { bp.slots = null; return bp; } //AqCM: chest already configured and the extra items cannot keep it at the minimum units: leave it untouched
         }
         if (signalOf(best) != signal || (encoderMaxFilling && best.skipped.size() > exact.skipped.size())) best = exact; //AqCM: dummy tail (max filling off) wins even if the adaptive plan skips fewer items
         Plan plan = best;
@@ -724,7 +725,7 @@ public class StorageTech {
             if (!w.isBlockLoaded(p)) continue;
             IBlockState st = w.getBlockState(p);
             if (st.getMaterial() == Material.AIR) continue;
-            ItemStack s = st.getBlock().getItem(w, p, st);
+            ItemStack s = st.getBlock() instanceof net.minecraft.block.BlockHugeMushroom ? new ItemStack(st.getBlock()) : st.getBlock().getItem(w, p, st); // huge mushrooms pick-block as the small one
             if (s.isEmpty()) {
                 String n = String.valueOf(Block.REGISTRY.getNameForObject(st.getBlock()));
                 if (!ignored.contains(n)) ignored.add(n);
@@ -756,7 +757,7 @@ public class StorageTech {
             if ((Integer) e[1] == 0) {
                 boolean dup = false;
                 for (ItemStack t : blocks) dup |= ItemStack.areItemsEqual(t, s);
-                if (dup) continue;
+                if (dup) { String n = Item.REGISTRY.getNameForObject(s.getItem()) + ":" + s.getMetadata() + " (duplicate)"; if (!ignored.contains(n)) ignored.add(n); continue; }
                 blocks.add(s);
             }
             r.add(s);
