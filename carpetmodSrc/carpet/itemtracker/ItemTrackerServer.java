@@ -15,7 +15,9 @@ import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemShulkerBox;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketCustomPayload;
@@ -63,12 +65,19 @@ public class ItemTrackerServer implements PluginChannelHandler {
         for (Map.Entry<EntityPlayerMP, ItemStack> en : tracked.entrySet()) send(en.getKey(), en.getValue());
     }
 
-    private static boolean matches(ItemStack want, ItemStack s) {
-        if (s == null || s.isEmpty() || s.getItem() != want.getItem()) return false;
-        if (s.getItem().isDamageable()) return true; // same rule as the client mod: tools match by type only
-        return ItemStack.areItemsEqual(s, want) && ItemStack.areItemStackTagsEqual(s, want);
-    }
-
+    private static boolean matches(ItemStack want, ItemStack s) { return matches(want, s, 0); }
+
+    private static boolean matches(ItemStack want, ItemStack s, int depth) {
+        if (s == null || s.isEmpty()) return false;
+        if (s.getItem() == want.getItem() && (s.getItem().isDamageable() // same rule as the client mod: tools match by type only
+                || (ItemStack.areItemsEqual(s, want) && ItemStack.areItemStackTagsEqual(s, want)))) return true;
+        if (depth < 3 && s.getItem() instanceof ItemShulkerBox && s.hasTagCompound() && s.getTagCompound().hasKey("BlockEntityTag", 10)) { //AqCM: look inside shulker box items
+            NBTTagList items = s.getTagCompound().getCompoundTag("BlockEntityTag").getTagList("Items", 10);
+            for (int i = 0; i < items.tagCount(); i++) if (matches(want, new ItemStack(items.getCompoundTagAt(i)), depth + 1)) return true;
+        }
+        return false;
+    }
+
     private static boolean holds(ItemStack want, IInventory inv) {
         for (int i = 0; i < inv.getSizeInventory(); i++) if (matches(want, inv.getStackInSlot(i))) return true;
         return false;
